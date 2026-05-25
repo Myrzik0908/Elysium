@@ -1,0 +1,258 @@
+.container {
+  display: flex; flex-direction: column; height: 100vh;
+  background-color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #000; overflow: hidden; position: relative; 
+}
+
+.dropOverlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255, 255, 255, 0.9); z-index: 1000; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+.dropBox { border: 2px dashed #FFD54F; border-radius: 16px; padding: 40px; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: rgba(255, 213, 79, 0.05); }
+.dropIcon { font-size: 48px; margin-bottom: 16px; }
+.dropText { font-size: 18px; color: #333; font-weight: 500; }
+
+.header { display: flex; align-items: center; padding: 8px 16px; background-color: #fff; border-bottom: 1px solid #eee; min-height: 56px; z-index: 10; flex-shrink: 0; }
+.iconButton { background: none; border: none; font-size: 24px; color: #333; cursor: pointer; padding: 4px 8px; display: flex; align-items: center; justify-content: center; }
+.chatInfo { display: flex; align-items: center; flex: 1; margin: 0 12px; overflow: hidden; cursor: pointer; border-radius: 8px; transition: background-color 0.2s; }
+.chatInfo:hover { background-color: #f5f5f5; }
+.titleWrapper { display: flex; flex-direction: column; overflow: hidden; }
+.title { font-size: 17px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.status { font-size: 13px; color: #888; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+.avatarLoading { width: 100%; height: 100%; border-radius: 50%; background-color: #e0e0e0; animation: pulse 1.5s infinite ease-in-out; }
+.senderAvatarLoading { width: 100%; height: 100%; border-radius: 50%; background-color: #e0e0e0; animation: pulse 1.5s infinite ease-in-out; }
+
+.chatAvatarWrapper { width: 40px; height: 40px; border-radius: 50%; margin-right: 12px; flex-shrink: 0; overflow: hidden; }
+.avatarFallback, .avatarImage { width: 40px; height: 40px; border-radius: 50%; }
+.avatarFallback { background-color: #FFD700; color: #000; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; }
+.avatarImage { object-fit: cover; background-color: #eee; }
+
+.userAvatar { width: 40px; height: 40px; border-radius: 50%; margin-right: 10px; flex-shrink: 0; cursor: pointer; overflow: hidden; display: flex; align-items: center; justify-content: center; background-color: #fff; transition: transform 0.2s; }
+.userAvatar:hover { transform: scale(1.05); }
+.userAvatarFallback { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background-color: #e0e0e0; font-size: 18px; font-weight: bold; color: #555; }
+.userAvatarImage { width: 100%; height: 100%; object-fit: cover; }
+
+.messageList { flex: 1; overflow-y: auto; padding: 16px; background-color: #f9f9f9; display: flex; flex-direction: column; position: relative; }
+.messageWrapper { display: flex; width: 100%; margin-bottom: 10px; align-items: flex-end; }
+.otherMessageWrapper { justify-content: flex-start; }
+.ownMessageWrapper { justify-content: flex-end; }
+.messageAvatar { width: 34px; height: 34px; border-radius: 50%; margin-right: 8px; flex-shrink: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; background-color: #e0e0e0; }
+.senderAvatarImg { width: 100%; height: 100%; object-fit: cover; }
+.senderAvatarFallback { font-size: 14px; font-weight: bold; color: #555; }
+
+.messageBubble { max-width: 80%; padding: 6px 12px; border-radius: 18px; position: relative; word-wrap: break-word; box-shadow: 0 1px 1px rgba(0,0,0,0.05); text-align: left; }
+.otherBubble { background-color: #ffffff; color: #000; border-bottom-left-radius: 4px; border: 1px solid #efefef; }
+.ownBubble { background-color: #FFF9C4; color: #000; border-bottom-right-radius: 4px; border: none; }
+.pendingBubble { opacity: 0.6; transition: opacity 0.3s ease; }
+.senderNameInside { display: block; text-align: left; font-size: 13px; font-weight: 600; color: #378ac4; margin-bottom: 2px; }
+.messageText { margin: 0; font-size: 15px; line-height: 1.35; white-space: pre-wrap; }
+.messageFooter { display: flex; justify-content: flex-end; align-items: center; margin-top: 4px; gap: 6px; float: right; clear: both; }
+.copyButton, .deleteButton, .replyButton { background: none; border: none; cursor: pointer; padding: 0; font-size: 12px; opacity: 0.5; transition: opacity 0.2s, transform 0.2s; color: #888; display: flex; align-items: center; justify-content: center; }
+.messageBubble:hover .copyButton, .messageBubble:hover .deleteButton, .messageBubble:hover .replyButton { opacity: 1; }
+.copyButton:hover, .deleteButton:hover, .replyButton:hover { transform: scale(1.2); }
+.deleteButton:hover { color: #ff4d4d; }
+
+.replyContainer { display: flex; align-items: stretch; background-color: rgba(0, 0, 0, 0.05); border-radius: 4px; margin-bottom: 4px; cursor: pointer; padding: 4px 8px; max-width: 100%; box-sizing: border-box; overflow: hidden; }
+.ownBubble .replyContainer { background-color: rgba(0, 0, 0, 0.05); }
+.replyLine { width: 3px; background-color: #378ac4; border-radius: 2px; margin-right: 8px; flex-shrink: 0; }
+.ownBubble .replyLine { background-color: #FBC02D; }
+.replyContent { display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+.replyName { font-size: 12px; font-weight: 600; color: #378ac4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ownBubble .replyName { color: #FBC02D; }
+.replyText { font-size: 12px; color: #666; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.replyBar { display: flex; align-items: center; justify-content: space-between; background-color: #f5f5f5; padding: 6px 16px; border-bottom: 1px solid #eee; width: 100%; box-sizing: border-box; min-height: 40px; }
+.replyBarInfo { display: flex; flex-direction: column; overflow: hidden; flex: 1; min-width: 0; margin-right: 12px; border-left: 3px solid #FFD54F; padding-left: 10px; }
+.replyBarName { font-size: 12px; font-weight: 600; color: #FBC02D; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.replyBarText { font-size: 13px; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; display: block; }
+.replyBarClose { background: none; border: none; color: #888; font-size: 18px; cursor: pointer; padding: 4px; flex-shrink: 0; }
+
+.fileMessage { display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 4px 0; }
+.fileIcon { font-size: 24px; line-height: 1; }
+.fileName { font-size: 15px; font-weight: 500; color: #333; text-decoration: underline; text-decoration-style: dotted; word-break: break-all; }
+
+.mediaContainer { position: relative; width: 100%; min-width: 200px; max-width: 320px; background-color: #000; border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center; margin-top: 4px; margin-bottom: 4px; }
+.mediaPlaceholder { width: 100%; aspect-ratio: 4 / 3; display: flex; align-items: center; justify-content: center; }
+.mediaImage { width: 100%; height: auto; max-height: 400px; object-fit: contain; display: block; background-color: #000; cursor: pointer; }
+.mediaVideo { width: 100%; max-height: 400px; display: block; background-color: #000; border-radius: 8px; max-width: 280px; }
+
+.audioContainer { position: relative; width: 100%; min-width: 240px; background-color: rgba(0,0,0,0.05); border-radius: 12px; padding: 8px; box-sizing: border-box; margin-top: 4px; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+.audioPlaceholder { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; flex-shrink: 0; border-radius: 50%; background-color: #FFD54F; cursor: pointer; transition: background-color 0.2s; color: #4e342e; font-size: 18px; }
+.audioPlaceholder:hover { background-color: #FFCA28; }
+.audioPlayer { width: 100%; height: 36px; flex: 1; min-width: 100px; }
+.fileNameContainer { flex: 1; min-width: 0; display: flex; align-items: center; overflow: hidden; }
+.fileNameText { font-size: 14px; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+
+.mediaControlBtn { background-color: rgba(0, 0, 0, 0.6); color: white; border: none; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; z-index: 5; transition: background-color 0.2s, transform 0.2s; backdrop-filter: blur(4px); flex-shrink: 0; }
+.mediaControlBtn:hover { background-color: rgba(0, 0, 0, 0.8); transform: scale(1.1); }
+.mediaDownloadBtn { position: absolute; top: 8px; right: 8px; }
+.audioDownloadBtn { position: relative; top: auto; right: auto; background-color: rgba(0,0,0,0.1); color: #555; }
+.audioDownloadBtn:hover { background-color: rgba(0,0,0,0.2); }
+.mediaFullscreenBtn { position: absolute; bottom: 8px; right: 8px; }
+.viewMediaBtn { width: 56px; height: 56px; border-radius: 50%; background-color: rgba(255, 255, 255, 0.2); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 28px; color: white; backdrop-filter: blur(4px); }
+.viewMediaBtn:hover { background-color: rgba(255, 255, 255, 0.4); }
+
+.spinner { width: 40px; height: 40px; border: 4px solid rgba(255, 255, 255, 0.3); border-top-color: #fff; border-radius: 50%; animation: spin 1s linear infinite; }
+.spinnerSmall { width: 20px; height: 20px; border-width: 2px; border-top-color: #fff; border-color: rgba(255,255,255,0.3); }
+@keyframes spin { to { transform: rotate(360deg); } }
+.pendingClock { font-size: 14px; display: inline-block; animation: spin 2s linear infinite; margin-left: 5px; }
+.timestamp { display: inline-block; text-align: right; font-size: 11px; color: #888; margin-left: 10px; }
+
+.gifContainer { display: flex; flex-direction: column; gap: 4px; }
+.gifImage { max-width: 100%; min-width: 150px; border-radius: 8px; display: block; }
+.gifLinkText { font-size: 12px; color: #666; margin-top: 4px; text-decoration: none; }
+
+.scrollToBottomButton { position: sticky; bottom: 20px; align-self: center; width: 44px; height: 44px; min-width: 44px; min-height: 44px; padding: 0; box-sizing: border-box; border-radius: 50%; background-color: #fff; border: none; box-shadow: 0 2px 5px rgba(0,0,0,0.2); font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: opacity 0.2s, transform 0.2s; z-index: 5; }
+.scrollToBottomButton:hover { transform: scale(1.1); background-color: #f0f0f0; }
+
+.footer { display: flex; flex-direction: column; background-color: #fff; flex-shrink: 0; border-top: 1px solid #eee; z-index: 10; }
+.inputRow { display: flex; align-items: center; padding: 8px 16px; }
+
+.attachButton { background: none; border: none; font-size: 22px; color: #888; cursor: pointer; padding-right: 12px; display: flex; align-items: center; height: 42px; }
+.inputContainer { flex: 1; display: flex; align-items: center; min-height: 42px; }
+.input { flex: 1; border: none; background-color: #f5f5f5; border-radius: 20px; padding: 10px 16px; font-size: 15px; outline: none; font-family: inherit; resize: none; max-height: 120px; overflow-y: auto; line-height: 1.4; box-sizing: border-box; height: 42px; min-height: 42px; width: 100%; }
+.input:focus { background-color: #eeeeee; }
+
+.recordingInput { display: flex; align-items: center; background-color: #ffebee; color: #d32f2f; font-weight: 500; cursor: default; }
+.recordingDot { width: 8px; height: 8px; background-color: #d32f2f; border-radius: 50%; margin-right: 10px; animation: pulse 1s infinite ease-in-out; }
+.recordingTimerText { flex: 1; }
+
+.actionButtonsContainer { display: flex; align-items: center; margin-left: 8px; height: 42px; gap: 2px; }
+.micButton { background: none; border: none; font-size: 18px; color: #888; cursor: pointer; padding: 0 6px; transition: transform 0.2s, color 0.2s, opacity 0.2s; display: flex; align-items: center; justify-content: center; user-select: none; -webkit-user-select: none; touch-action: manipulation; width: 36px; height: 36px; border-radius: 50%; }
+.micButton:hover { transform: scale(1.1); color: #555; }
+
+.stopButton { background-color: #d32f2f; border: none; border-radius: 50%; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; font-size: 20px; color: white; cursor: pointer; transition: background-color 0.2s, transform 0.2s; flex-shrink: 0; }
+.stopButton:hover { background-color: #b71c1c; transform: scale(1.1); }
+
+.previewActions { display: flex; align-items: center; margin-left: 8px; gap: 4px; height: 42px; }
+.previewBtn { background: none; border: none; font-size: 20px; cursor: pointer; padding: 0 6px; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; transition: background-color 0.2s, transform 0.2s; }
+.previewBtn:hover { background-color: #f0f0f0; transform: scale(1.1); }
+.sendPreviewBtn { color: #FFCA28; }
+.sendPreviewBtn:hover { background-color: rgba(255, 202, 40, 0.1); }
+
+.sendButton { background: none; border: none; font-size: 24px; color: #ccc; cursor: pointer; padding: 0 8px; transition: color 0.2s, transform 0.2s; display: flex; align-items: center; justify-content: center; }
+.sendButtonActive { color: #FFCA28; cursor: pointer; }
+.sendButtonActive:hover { transform: scale(1.1); }
+.sendButton:disabled { cursor: default; opacity: 0.5; }
+
+.hashtagList { background-color: #ffffff; border-bottom: 1px solid #e0e0e0; max-height: 250px; overflow-y: auto; padding: 8px 0; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+.hashtagItem { padding: 12px 20px; cursor: pointer; color: #3390ec; font-weight: 500; transition: background-color 0.15s; }
+.hashtagItem:hover { background-color: #f0f2f5; }
+.hashtagItem:active { background-color: #e4e6eb; }
+
+.skeletonBubble { padding: 12px 16px; background-color: #e0e0e0 !important; border: none !important; box-shadow: none !important; min-height: 40px; min-width: 100px; max-width: 65%; border-radius: 18px; animation: pulse 1.5s infinite ease-in-out; }
+.otherBubble.skeletonBubble { border-bottom-left-radius: 4px; }
+.ownBubble.skeletonBubble { border-bottom-right-radius: 4px; }
+.skeletonText { height: 10px; width: 100%; background-color: #bdbdbd; border-radius: 4px; margin-bottom: 8px; }
+.skeletonText:last-child { margin-bottom: 0; }
+
+.fullscreenVideoOverlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: #000; z-index: 100; display: flex; flex-direction: column; }
+.fullscreenVideo { width: 100%; height: 100%; object-fit: cover; background-color: #000; opacity: 0; transition: opacity 0.2s ease-in-out; }
+.videoReady { opacity: 1; }
+.videoControlsTop { position: absolute; top: 0; left: 0; right: 0; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(to bottom, rgba(0,0,0,0.5), transparent); z-index: 101; }
+.videoControlsBottom { position: absolute; bottom: 0; left: 0; right: 0; padding: 30px 20px; display: flex; justify-content: center; align-items: center; background: linear-gradient(to top, rgba(0,0,0,0.5), transparent); z-index: 101; }
+.recordingVideoTimer { background-color: rgba(0, 0, 0, 0.6); color: white; padding: 6px 12px; border-radius: 20px; font-size: 15px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+.switchCameraBtn { background-color: rgba(255, 255, 255, 0.2); color: white; border: none; border-radius: 50%; width: 44px; height: 44px; font-size: 22px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background-color 0.2s, transform 0.2s; }
+.switchCameraBtn:hover { background-color: rgba(255, 255, 255, 0.4); transform: scale(1.1) rotate(180deg); }
+
+.previewVideo { width: 100%; max-height: 240px; border-radius: 12px; background-color: #000; outline: none; }
+.audioPreviewWrapper { width: 100%; background-color: #f5f5f5; border-radius: 20px; padding: 0 12px; height: 42px; display: flex; align-items: center; box-sizing: border-box; }
+.previewAudioPlayer { width: 100%; height: 36px; outline: none; }
+
+/* --- Text/Code Preview Styles --- */
+.viewCodeButtonActive { opacity: 1 !important; color: #FBC02D; }
+
+.textPreviewContainer { 
+  margin-top: 8px; 
+  background-color: #000000;
+  border-radius: 8px; 
+  max-height: 250px; 
+  overflow: auto; 
+  position: relative; 
+}
+
+.textPreviewContent {
+  margin: 0;
+  padding: 12px 40px 12px 12px; 
+  font-family: 'Courier New', Courier, monospace; 
+  font-size: 13px;
+  line-height: 1.5;
+  color: #ffffff; /* Чистый белый текст */
+  white-space: pre-wrap; 
+  word-wrap: break-word; 
+  background-color: transparent !important; 
+  border: none;
+  outline: none;
+}
+
+.textPreviewContent code {
+  background-color: transparent !important;
+  color: #ffffff !important;
+  font-family: inherit !important;
+  font-size: inherit !important;
+}
+
+.copyCodeButton { 
+  position: absolute; 
+  top: 8px; 
+  right: 8px; 
+  background-color: rgba(255, 255, 255, 0.1); 
+  border: none; 
+  border-radius: 4px; 
+  color: #d4d4d4; 
+  cursor: pointer; 
+  padding: 4px 8px; 
+  font-size: 14px; 
+  transition: background-color 0.2s, color 0.2s; 
+  z-index: 5; 
+}
+.copyCodeButton:hover { background-color: rgba(255, 255, 255, 0.3); color: #fff; }
+
+.textPreviewLoading { display: flex; justify-content: center; align-items: center; padding: 20px; }
+
+/* Custom Scrollbar for Code Preview */
+.textPreviewContainer::-webkit-scrollbar { width: 6px; height: 6px; }
+.textPreviewContainer::-webkit-scrollbar-track { background: #000000; }
+.textPreviewContainer::-webkit-scrollbar-thumb { background-color: #555; border-radius: 3px; }
+.textPreviewContainer::-webkit-scrollbar-thumb:hover { background-color: #888; }
+
+.disabledControl {
+  opacity: 0.5; 
+  pointer-events: none; 
+  cursor: default;
+}
+
+.errorCardContainer { 
+  flex: 1; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  padding: 40px 20px; 
+  height: 100%;
+}
+
+.errorCard { 
+  background-color: #fff3e0; 
+  border: 1px solid #ffe0b2; 
+  border-radius: 16px; 
+  padding: 32px 24px; 
+  max-width: 320px; 
+  width: 100%; 
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+  text-align: center; 
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
+}
+
+.errorCardIcon { 
+  font-size: 48px; 
+  margin-bottom: 20px; 
+}
+
+.errorCardText { 
+  font-size: 15px; 
+  line-height: 1.5; 
+  color: #e65100; 
+  margin: 0; 
+  font-weight: 500;
+}

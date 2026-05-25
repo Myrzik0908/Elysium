@@ -1,0 +1,355 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; 
+  background-color: #FFF9E6;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  box-sizing: border-box;
+}
+
+.header {
+  width: 100%;
+  text-align: center;
+  margin-top: 40px; 
+  padding: 0 20px;
+  box-sizing: border-box;
+  flex-shrink: 0; 
+}
+
+.title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #000;
+  margin: 0;
+}
+
+.content {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto; 
+  margin-top: 30px;
+  flex: 1; 
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 0 20px 30px 20px; 
+  box-sizing: border-box;
+}
+
+/* --- Sections --- */
+.section {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  border: 1px solid #eee;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  flex-shrink: 0;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.sectionTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* --- Toggle Switch --- */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 28px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .3s;
+  border-radius: 28px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 22px;
+  width: 22px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .3s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #FFD700;
+}
+
+input:checked + .slider:before {
+  transform: translateX(22px);
+}
+
+/* --- Key Manager Items --- */
+.keyManagerContent {
+  margin-top: 15px;
+}
+
+/* Lock Screen */
+.lockScreen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 10px;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 20px;
+}
+
+.passwordInputWrapper {
+  position: relative;
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.inputField {
+  width: 100%;
+  padding: 10px;
+  padding-right: 45px; 
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.eyeBtn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-size: 18px;
+  opacity: 0.6;
+  line-height: 1;
+}
+
+.eyeBtn:hover {
+  opacity: 1;
+}
+
+.errorText {
+  color: #D32F2F;
+  font-size: 12px;
+  margin-bottom: 8px;
+  align-self: flex-start;
+}
+
+.unlockBtn {
+  width: 100%;
+  padding: 12px;
+  background-color: #000;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.unlockBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* All Keys Toggle Row */
+.allKeysToggleRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  font-weight: 500;
+  color: #333;
+}
+
+/* Key List */
+.keyList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.keyItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.keyInfo {
+  flex: 1;
+  min-width: 0;
+  margin-right: 10px;
+}
+
+.chatName {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #000;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.keyRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.keyValue {
+  font-family: monospace;
+  font-size: 12px;
+  background: #f5f5f5;
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: #666;
+
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  scrollbar-width: thin;          /* Firefox */
+  scrollbar-color: #ddd transparent; /* Firefox */
+}
+
+/* Webkit scrollbar (Chrome, Safari) */
+.keyValue::-webkit-scrollbar {
+  height: 4px;
+}
+
+.keyValue::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.keyValue::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 2px;
+}
+
+.iconBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-size: 16px;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+.iconBtn:hover {
+  opacity: 1;
+}
+
+.deleteBtn {
+  background: #FFEBEE;
+  color: #C62828;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.emptyMessage {
+  text-align: center;
+  color: #999;
+  font-size: 14px;
+  padding: 20px 0;
+}
+
+/* --- Language Selector --- */
+.selectField {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  background-color: #fff;
+  cursor: pointer;
+}
+
+/* --- Footer --- */
+.footer {
+  position: sticky;
+  bottom: 0;
+  background-color: #FFF9E6;
+  padding-top: 15px;
+  padding-bottom: max(20px, env(safe-area-inset-bottom));
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding-left: 20px;
+  padding-right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.button {
+  width: 100%;
+  padding: 16px 24px;
+  border-radius: 14px;
+  border: 2px solid #000;
+  cursor: pointer;
+  font-size: 17px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.secondaryBtn {
+  background-color: #fff;
+  color: #000;
+}
+
+.secondaryBtn:hover {
+  background-color: #f5f5f5;
+}
+
+.exitBtn {
+  background-color: #FFEBEE;
+  color: #C62828;
+  border-color: #FFCDD2;
+}
+
+.exitBtn:hover {
+  background-color: #FFCDD2;
+  border-color: #EF9A9A;
+}

@@ -1,0 +1,258 @@
+.app {
+  position: relative;
+  min-height: 100vh;
+  background-color: #fafafa;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.resetButton {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  padding: 8px 16px;
+  background-color: #ffebee;
+  color: #c62828;
+  border: 1px solid #ef9a9a;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 100;
+}
+
+.resetButton:hover {
+  background-color: #ffcdd2;
+  transform: translateY(-1px);
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+  background-color: #FFF9E6;
+}
+
+.contentWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 400px;
+  padding: 24px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.welcomeText {
+  display: block;
+  font-size: 18px;
+  color: #666;
+  font-weight: 400;
+  margin-bottom: 4px;
+}
+
+.logoText {
+  font-size: 40px;
+  font-weight: 700;
+  color: #000;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+.subtitle {
+  font-size: 15px;
+  color: #888;
+  margin-top: 8px;
+  margin-bottom: 0;
+}
+
+.quickLoginSection {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.quickLoginSection .button {
+  margin-bottom: 0;
+}
+
+.buttonContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 16px 24px;
+  border: 2px solid #000;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  font-size: 17px;
+  font-weight: 600;
+  background-color: #fff;
+  color: #000;
+  margin-bottom: 0;
+  position: relative; /* Important for ping badge */
+  overflow: visible; /* Ensure badge is not cut off */
+}
+
+.button:active {
+  transform: scale(0.98);
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.googleBtn { background-color: #FFF9C4; color: #000; }
+.googleBtn:hover { background-color: #FFF176; }
+.yandexBtn { background-color: #FCE4EC; color: #C2185B; }
+.yandexBtn:hover { background-color: #F8BBD0; }
+.oneDriveBtn { background-color: #E3F2FD; color: #0277BD; }
+.oneDriveBtn:hover { background-color: #BBDEFB; }
+
+.primaryBtn {
+  background-color: #FFF9C4;
+}
+
+.primaryBtn:hover {
+  background-color: #FFF176;
+}
+
+.secondaryBtn {
+  background-color: #fff;
+}
+
+.secondaryBtn:hover {
+  background-color: #f5f5f5;
+}
+
+.btnIcon {
+  font-size: 18px;
+}
+
+.btnText {
+  letter-spacing: 0.2px;
+}
+
+.hintText {
+  margin-top: 24px;
+  font-size: 14px;
+  color: #666;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.successText {
+  font-size: 16px;
+  color: #2e7d32;
+  margin: 16px 0;
+  text-align: center;
+}
+
+.tokenDetails {
+  width: 100%;
+  margin: 16px 0;
+  padding: 12px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.tokenCode {
+  display: block;
+  margin-top: 8px;
+  padding: 8px;
+  background-color: #fff;
+  border-radius: 4px;
+  word-break: break-all;
+  font-family: monospace;
+  font-size: 12px;
+  color: #333;
+}
+
+.loadingState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #4CAF50;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* --- Ping Styles --- */
+.pingBadge {
+  position: absolute;
+  right: 15px; /* Changed from left to right */
+  font-size: 12px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background-color: rgba(255, 255, 255, 0.4);
+  color: #333;
+  min-width: 45px;
+  text-align: center;
+}
+
+.pingLow {
+  color: #1b5e20; /* Dark Green */
+  background-color: rgba(76, 175, 80, 0.2); /* Light Green */
+}
+
+.pingMedium {
+  color: #e65100; /* Dark Orange */
+  background-color: rgba(255, 152, 0, 0.2); /* Light Orange */
+}
+
+.pingHigh {
+  color: #b71c1c; /* Dark Red */
+  background-color: rgba(244, 67, 54, 0.2); /* Light Red */
+}
+
+.pingError {
+  color: #b71c1c;
+  background-color: transparent;
+  font-size: 14px;
+}
+
+@media (max-width: 480px) {
+  .logoText {
+    font-size: 36px;
+  }
+  .button {
+    padding: 14px 20px;
+    font-size: 16px;
+  }
+}

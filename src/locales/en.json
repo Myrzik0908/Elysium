@@ -1,0 +1,256 @@
+{
+  "translation": {
+    "welcome": "Welcome to",
+    "login": "Sign In",
+    "register": "Register",
+    "signIn": "Sign In",
+    "back": "Back",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "create": "Create",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "viewContents": "View Contents",
+    "loading": "Loading...",
+    "sending": "Sending...",
+    "error": "Error",
+    "success": "Success",
+    "yes": "Yes",
+    "no": "No",
+    "update": "Update",
+    "replyingTo": "Replying to",
+    "yourself": "yourself",
+    "stopRecording": "Stop Recording",
+    "view": "View",
+    "fullscreen": "Fullscreen",
+    "send": "Send",
+    "reply": "Reply",
+    "message": "Message",
+    "user": "User",
+    "chat": "Chat",
+    "unknown": "Unknown",
+    "confirmDeleteMessage": "Delete this message?",
+    "microphonePermissionDenied": "Microphone access denied.",
+
+    "app": {
+      "resetIds": "Reset IDs",
+      "chatsTitle": "Elysium",
+      "alertCloud": "Cloud not initialized",
+      "alertName": "Please enter chat name",
+      "alertError": "Error: ",
+      "alertFailedCreate": "Failed to create chat. Check console for details.",
+      "alertFailedSave": "Failed to save changes.",
+      "alertDelete": "Delete this chat?",
+      "alertFailedDelete": "Failed to delete chat",
+      "sessionExpired": "Session expired. Please log in again."
+    },
+
+    "loginPage": {
+      "title": "Elysium",
+      "quickLogin": "Quick Login",
+      "addProvider": "Add Provider"
+    },
+
+    "registerPage": {
+      "createApp": "Create Application",
+      "selectProvider": "Select cloud provider",
+      "pasteId": "Paste your new Client ID below",
+      "enterId": "Enter Client ID...",
+      "saveAndLogin": "Save and Sign In",
+      "backToList": "Back to list",
+      "backToWelcome": "Back to Welcome"
+    },
+
+    "addProviderPage": {
+      "title": "Add Provider",
+      "subtitle": "Sign in with existing Client ID",
+      "selectProvider": "Select Provider",
+      "clientId": "Client ID",
+      "pasteHere": "Paste your Client ID here..."
+    },
+
+    "chatsPage": {
+      "initializing": "Initializing...",
+      "noChats": "You don't have any chats.",
+      "createHint": "Create a new chat to get started.",
+      "createBtn": "+ Chat"
+    },
+
+    "chatPage": {
+      "messagePlaceholder": "Message...",
+      "uploadingFile": "Uploading file...",
+      "downloadFile": "Download file",
+      "visitVerified": "Visit only verified chats!",
+      "enterKey": "Enter Key",
+      "keyForChat": "Enter the encryption key for chat:",
+      "decrypt": "Decrypt",
+      "encryptionKey": "Encryption Key...",
+      "dropFiles": "Drop files here to send",
+      "selectedChat": "Selected Chat",
+      "decryptionFailed": "Failed to process data. Check the encryption key or try again later.",
+      "exportChat": "Export chat"
+    },
+
+    "createChat": {
+      "title": "Create Chat",
+      "namePlaceholder": "Chat Name",
+      "descPlaceholder": "Description (optional)",
+      "publicAvatar": "Public",
+      "privateAvatar": "Private",
+      "encKeyLabel": "Encryption Key (Min 32 chars)",
+      "quickLogin": "Quick Login",
+      "participants": "Participants",
+      "addUser": "+ Add User",
+      "yandexHint": "For Yandex.Disk, participants are added via a public invite link after creating the chat.",
+      "alertEncKey": "Encryption key must be at least 32 characters long."
+    },
+
+    "editChat": {
+      "title": "Edit Chat",
+      "inviteLink": "Invite Link",
+      "getLink": "Get Invite Link",
+      "generating": "Generating...",
+      "yandexLinkHint": "Yandex Disk uses public links for access.",
+      "deleteConfirm": "Delete this chat?",
+      "alertKeyNotFound": "Encryption key not found.",
+      "alertLinkFailed": "Failed to get link"
+    },
+
+    "editProfile": {
+      "title": "Edit Profile",
+      "displayName": "Display Name",
+      "enterName": "Enter your name",
+      "email": "Email Address",
+      "emailHint": "Your email associated with this chat",
+      "changeAvatar": "Click to change avatar",
+      "alertName": "Please enter a name"
+    },
+
+    "settings": {
+      "title": "Elysium",
+      "keyManager": "Key Manager",
+      "enterMasterPass": "Enter Master Password...",
+      "setMasterPass": "Set Master Password (min 12 chars)",
+      "showAllKeys": "Show All Keys",
+      "noKeys": "No saved keys.",
+      "language": "Language",
+      "userAgreement": "User Agreement",
+      "exit": "Exit",
+      "confirmDisable": "Disable Key Manager? This will remove keys for this provider.",
+      "passMinLength": "Minimum password length 12 characters"
+    },
+
+    "masterPass": {
+      "title": "Key Manager",
+      "provider": "Provider:",
+      "enterPass": "Enter master password",
+      "unlock": "Unlock",
+      "checking": "Checking...",
+      "wrongPass": "Wrong password or data corrupted",
+      "disable": "Disable Key Manager (reset)"
+    },
+
+    "gettingStarted": {
+      "title": "Elysium",
+      "subtitle": "Getting Started Guide",
+      "description": "Elysium requires a local HTTP server to function properly due to browser security policies. Please select your platform below to view the setup instructions.",
+      "tabs": {
+        "desktop": "Windows / Linux / Mac",
+        "android": "Android",
+        "ios": "iOS"
+      },
+      "whyTitle": "Why do I need this?",
+      "whyText": "Modern browsers block certain features (like modules and fetch API) when opening files directly (file://). Running a local server solves this.",
+      "winTitle": "Windows",
+      "winOpt1": "Option 1 (Recommended): Python",
+      "winOpt2": "Option 2: Microsoft Store App",
+      "winStep1": "Install Python from python.org.",
+      "winStep2": "Open Command Prompt (cmd) in the folder containing index.html.",
+      "winStep3": "Run the following command:",
+      "winOpt2Step1": "Install \"HTTP Server\" from Microsoft Store (e.g., by phlox).",
+      "winOpt2Step2": "Open the app and select the Elysium folder.",
+      "winOpt2Step3": "Start the server.",
+      "macTitle": "macOS / Linux",
+      "macText": "Python is usually pre-installed. Open Terminal in the project folder and run:",
+      "macHint": "If Python is missing, install it via Homebrew (brew install python) or your package manager (sudo apt install python3).",
+      "androidTitle": "Android",
+      "androidRec": "We recommend using \"Simple HTTP Server\".",
+      "androidInst": "Instructions:",
+      "androidInst1": "Install the application.",
+      "androidInst2": "Open it and tap \"Select folder\".",
+      "androidInst3": "Choose the folder where index.html is located.",
+      "androidInst4": "Set \"http://localhost:8000\" in the settings. Click \"Start server\".",
+      "androidInst5": "Open the browser and go to the address",
+      "iosTitle": "iOS",
+      "iosRec": "We recommend using \"Documents by Readdle\".",
+      "iosInst1": "Install the app.",
+      "iosInst2": "Copy the Elysium project files into the Documents app.",
+      "iosInst3": "Open Documents, go to Settings (Gear icon).",
+      "iosInst4": "Enable \"Web Server\" (or \"Wi-Fi Transfer\").",
+      "iosInst5": "The app will display a URL. Open Safari and navigate to that URL.",
+      "footer": "After starting the server, open http://localhost:8000 (or the address shown by the app) in your browser."
+    },
+
+    "userAgreement": {
+      "title": "User Agreement",
+      "section1": "I. Elysium provides an opportunity for online communication among users.",
+      "section2": "II. Elysium does not collect, transfer, or use your personal data to third parties.",
+      "section3": "III. Elysium does not store your personal data on third-party servers.",
+      "section4Title": "IV. To store conversations, one of the available server options is used. You are entitled to choose any available under your jurisdiction:",
+      "section4Item1": "Yandex Drive",
+      "section4Item2": "Google Drive",
+      "section4Item3": "OneDrive",
+      "section5": "V. Elysium uses encryption methods that prevent the content of your conversation from being read without a special key, which must be held by each participant.",
+      "section6": "VI. Elysium is not responsible for your data in case of loss of the access key or deletion of the conversation.",
+      "section7Title": "VII. Elysium allows you to send:",
+      "section7Item1": "Text messages",
+      "section7Item2": "Images",
+      "section7Item3": "Video",
+      "section7Item4": "Audio",
+      "section7Item5": "Files",
+      "section9": "VIII. You can securely save the entire conversation to your device in JSON format. Decryption of your conversation will occur strictly on your device.",
+      "section10": "IX. The program is distributed \"AS IS\", therefore the user assumes all responsibility for its use."
+    },
+    "warningPage": {
+      "title": "Connection",
+      "confirmMessage": "Are you sure?",
+      "slogans": [
+        "Deleting does not mean erasing.",
+        "If rushed for an answer, it means no time to think is given. Stop.",
+        "A personal secret is someone else's power.",
+        "Adults seeking friends among children online always hide their faces.",
+        "A screenshot is taken instantly.",
+        "A sent photo remains in someone else's hands forever. Is it worth the risk?",
+        "Doubts? End the conversation.",
+        "The words \"tell no one\" are the first step into a trap.",
+        "The illusion of safety kills.",
+        "No one gives money for nothing on the internet. Everything has a price.",
+        "Intrusive care is just bait.",
+        "Manipulators always say what one wants to hear, not the truth.",
+        "Own naivety is someone else's profit.",
+        "If communication causes anxiety, it's not intuition playing tricks, it's a real threat.",
+        "\"Just between us\" is a trap.",
+        "Blackmail starts with one little secret that is scary to reveal.",
+        "Who is the communication really with?",
+        "Anyone can hide behind a fake avatar. Trust no one.",
+        "Take a moment to think. At least a minute.",
+        "Real friends do not demand proof of trust in the form of personal photos."
+      ],
+      "systemMessages": [
+        "Initializing protocol...",
+        "Connecting to remote node...",
+        "Verifying digital signature...",
+        "Decrypting chat metadata...",
+        "Synchronizing encryption keys...",
+        "Verifying participants...",
+        "Loading message structure...",
+        "Verifying data integrity...",
+        "Final synchronization...",
+        "Preparing secure channel...",
+        "Access granted."
+      ]
+    }
+  }
+}

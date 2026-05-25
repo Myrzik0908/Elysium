@@ -1,0 +1,318 @@
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #FFF9E6;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.contentWrapper {
+  width: 100%;
+  max-width: 400px;
+  padding: 20px;
+  padding-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  height: 100vh; 
+  box-sizing: border-box;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-shrink: 0;
+}
+
+.backButton {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: #333;
+  padding-right: 16px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.formSection {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 10px;
+}
+
+/* Avatars Section */
+.avatarsSection {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 20px;
+}
+
+.avatarItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.hiddenInput {
+  display: none;
+}
+
+.avatarLabel {
+  display: block;
+  width: 80px;
+  height: 80px;
+  border-radius: 14px;
+  border: 2px dashed #ccc;
+  cursor: pointer;
+  overflow: hidden;
+  background-color: #fff;
+  transition: border-color 0.2s;
+}
+
+.avatarLabel:hover {
+  border-color: #000;
+}
+
+.avatarPlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  color: #aaa;
+}
+
+.avatarImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatarText {
+  font-size: 12px;
+  color: #555;
+  font-weight: 600;
+}
+
+.inputsColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+/* Inputs */
+.input, .textarea {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 16px;
+  border-radius: 12px;
+  border: 2px solid #ddd;
+  background-color: #fff;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.input:focus, .textarea:focus {
+  outline: none;
+  border-color: #000;
+}
+
+.textarea {
+  resize: none;
+}
+
+.label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+/* Label Color States */
+.labelRed {
+  color: #D32F2F; /* Red */
+}
+
+.labelGreen {
+  color: #388E3C; /* Green */
+}
+
+.formGroup {
+  margin-bottom: 20px;
+}
+
+/* Key Input Wrapper */
+.keyInputWrapper {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.keyInputWrapper .input {
+  flex: 1;
+}
+
+.copyBtn {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px; 
+  border-radius: 12px;
+  border: 2px solid #ddd;
+  background-color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  padding: 0;
+}
+
+.copyBtn:hover {
+  border-color: #000;
+  background-color: #f9f9f9;
+}
+
+.copyBtn:active {
+  background-color: #eee;
+}
+
+/* Quick Login Button */
+.quickLoginBtn {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 2px solid;
+  margin-bottom: 20px; /* Spacing before participants */
+}
+
+.quickLoginActive {
+  background-color: #E8F5E9;
+  border-color: #4CAF50;
+  color: #2E7D32;
+}
+
+.quickLoginInactive {
+  background-color: #FFEBEE;
+  border-color: #F44336;
+  color: #C62828;
+}
+
+/* Participants */
+.participantsSection {
+  margin-bottom: 24px;
+}
+
+.participantsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.participantTag {
+  background-color: #E3F2FD;
+  color: #0277BD;
+  padding: 6px 10px;
+  border-radius: 20px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.removeParticipant {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  color: #0277BD;
+  padding: 0;
+  line-height: 1;
+}
+
+.addUserBtn {
+  background: none;
+  border: 2px dashed #aaa;
+  border-radius: 12px;
+  padding: 12px;
+  width: 100%;
+  color: #555;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.addUserBtn:hover {
+  border-color: #000;
+  color: #000;
+}
+
+.addUserForm {
+  background-color: #fff;
+  border-radius: 14px;
+  padding: 16px;
+  border: 1px solid #eee;
+}
+
+.addUserActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+/* Buttons */
+.footer {
+  display: flex;
+  gap: 10px;
+  padding-top: 16px;
+  border-top: 1px solid #eee;
+  flex-shrink: 0;
+  margin-top: auto;
+}
+
+.button {
+  flex: 1;
+  padding: 14px 20px;
+  border-radius: 14px;
+  border: 2px solid #000;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.primaryBtn {
+  background-color: #FFF9C4;
+  color: #000;
+}
+
+.primaryBtn:hover {
+  background-color: #FFF176;
+}
+
+.secondaryBtn {
+  background-color: transparent;
+  color: #000;
+  border-color: #ddd;
+}
+
+.secondaryBtn:hover {
+  border-color: #000;
+}
