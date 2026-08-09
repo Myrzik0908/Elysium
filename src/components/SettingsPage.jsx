@@ -7,7 +7,7 @@ const SettingsPage = ({
   onBack, onExit, onOpenUserAgreement, 
   api, token, providerName, 
   kmKeysList, saveKeyToKM, removeKeyFromKM, isKMEnabled,
-  chats, toggleKeyManager, userEmail
+  chats, toggleKeyManager, changeMasterPassword, userEmail, kmMasterPassword
 }) => {
   const { t } = useTranslation();
   
@@ -20,11 +20,12 @@ const SettingsPage = ({
   const [displayKeys, setDisplayKeys] = useState([]);
 
   useEffect(() => {
-    if (!providerName || !userEmail) return;
-    const keys = { session: `elysium_km_session_${providerName}_${userEmail}` };
-    const sessionPass = sessionStorage.getItem(keys.session);
-    if (sessionPass) setMasterPassword(sessionPass);
-  }, [providerName, userEmail]);
+    if (isKMEnabled && kmMasterPassword) {
+      setMasterPassword(kmMasterPassword);
+    } else if (!isKMEnabled) {
+      setMasterPassword('');
+    }
+  }, [isKMEnabled, kmMasterPassword]);
 
   useEffect(() => {
     if (!kmKeysList || kmKeysList.length === 0) {
@@ -65,12 +66,30 @@ const SettingsPage = ({
     }
   };
 
-  const handleConfirmActivation = () => {
+  const isDirty = isKMEnabled && masterPassword !== (kmMasterPassword || '');
+
+  const handleConfirm = async () => {
     if (masterPassword.length < 12) {
-      setPasswordError(t('settings.setMasterPass').replace('(min 12 chars)', ''));
+      setPasswordError('Min length 12 chars');
       return;
     }
-    toggleKeyManager(true, masterPassword);
+
+    try {
+      if (isAwaitingActivation && !isKMEnabled) {
+        await toggleKeyManager(true, masterPassword);
+      } else if (isKMEnabled && isDirty) {
+        const success = await changeMasterPassword(masterPassword);
+        if (!success) {
+          setPasswordError('Error changing password');
+          setMasterPassword(kmMasterPassword || '');
+        } else {
+          setPasswordError('');
+        }
+      }
+    } catch (err) {
+      console.error("Confirm error:", err);
+      setPasswordError('Error changing password');
+    }
   };
 
   const handleMasterPasswordChange = (e) => {
@@ -89,6 +108,7 @@ const SettingsPage = ({
   };
   
   const showContent = isKMEnabled || isAwaitingActivation;
+  const showConfirmButton = (isAwaitingActivation && !isKMEnabled) || isDirty;
 
   return (
     <div className={styles.container}>
@@ -136,10 +156,10 @@ const SettingsPage = ({
                 </div>
                 {passwordError && <span className={styles.errorText}>{passwordError}</span>}
                 
-                {isAwaitingActivation && !isKMEnabled && (
+                {showConfirmButton && (
                   <button 
                     className={styles.unlockBtn} 
-                    onClick={handleConfirmActivation}
+                    onClick={handleConfirm}
                     disabled={masterPassword.length < 12}
                   >
                     {t('confirm')}

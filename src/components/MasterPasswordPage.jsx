@@ -14,10 +14,21 @@ const MasterPasswordPage = ({ onSuccess, onDisable, providerName }) => {
     setIsLoading(true);
     setError('');
     
-    const success = await onSuccess(password);
-    if (!success) {
+    try {
+      const success = await onSuccess(password);
+      if (!success) {
+        setError(t('masterPass.wrongPass'));
+        setIsLoading(false);
+      }
+    } catch (err) {
       setError(t('masterPass.wrongPass'));
       setIsLoading(false);
+    }
+  };
+
+  const handleDisable = () => {
+    if (window.confirm(t('masterPass.disableConfirm') || 'Are you sure? This will delete all saved keys.')) {
+      onDisable();
     }
   };
 
@@ -53,7 +64,7 @@ const MasterPasswordPage = ({ onSuccess, onDisable, providerName }) => {
           </button>
         </form>
 
-        <button onClick={onDisable} className={styles.disableBtn}>
+        <button onClick={handleDisable} className={styles.disableBtn}>
           {t('masterPass.disable')}
         </button>
       </div>

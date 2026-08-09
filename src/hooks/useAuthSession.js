@@ -13,7 +13,6 @@ export const useAuthSession = (onSessionExpired) => {
       const params = new URLSearchParams(hash.substring(1));
       const accessToken = params.get('access_token');
       const provider = params.get('state') || 'google';
-
       const expiresIn = params.get('expires_in'); 
       
       if (accessToken) {
@@ -40,8 +39,9 @@ export const useAuthSession = (onSessionExpired) => {
       }
     };
 
-    const interval = setInterval(checkTokenExpiration, 60000);
+    checkTokenExpiration();
 
+    const interval = setInterval(checkTokenExpiration, 60000);
     window.addEventListener('focus', checkTokenExpiration);
 
     return () => {

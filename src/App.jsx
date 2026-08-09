@@ -66,8 +66,10 @@ function AppContent() {
     isLocked,
     kmKeysList,
     isInitialized,
+    masterPassword,
     performUnlock,
     toggleKeyManager,
+    changeMasterPassword,
     saveKeyToKM,
     removeKeyFromKM,
     isKeyInKM,
@@ -86,10 +88,10 @@ function AppContent() {
   useEffect(() => {
     const storedToken = sessionStorage.getItem('elysium_access_token');
     const storedProvider = sessionStorage.getItem('elysium_provider');
-    if (storedToken && storedProvider && !isInitializing.current && !api && !isLocked) {
+    if (storedToken && storedProvider && !isInitializing.current && !api) {
       initializeCloud(storedProvider, storedToken);
     }
-  }, [isLocked, api]);
+  }, [api]);
 
   useEffect(() => {
     const updatePings = async () => {
@@ -133,7 +135,9 @@ function AppContent() {
     } catch (error) {
       console.error('Cloud initialization failed:', error);
       alert(t('error'));
-      setCurrentScreen('welcome');
+      if (!isKMEnabled) {
+        setCurrentScreen('welcome');
+      }
     } finally {
       setIsLoading(false);
       isInitializing.current = false;
@@ -398,7 +402,9 @@ function AppContent() {
           isKMEnabled={isKMEnabled}
           chats={chats}
           toggleKeyManager={toggleKeyManager}
+          changeMasterPassword={changeMasterPassword}
           userEmail={userEmail}
+          kmMasterPassword={masterPassword}
       />,
       userAgreement: <UserAgreementPage onBack={() => goBack('settings')} />,
       editProfile: <EditProfilePage onBack={() => goBack('chat')} api={api} chatId={activeChat?.id} decryptionKey={decryptionKey} userEmail={userEmail} />,

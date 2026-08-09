@@ -91,6 +91,25 @@ export const useKeyManager = (providerName, token, userEmail) => {
     }
   };
 
+  const changeMasterPassword = async (newPassword) => {
+    if (!newPassword || newPassword.length < 12) return false;
+    
+    const keys = getKMKeys();
+    if (!keys) return false;
+
+    try {
+      const listToEncrypt = kmKeysList || [];
+      const newEncrypted = await encryptKMData(listToEncrypt, newPassword);
+      localStorage.setItem(keys.data, newEncrypted);
+      
+      setMasterPassword(newPassword);
+      return true;
+    } catch (e) {
+      console.error("Failed to change master password:", e);
+      return false;
+    }
+  };
+
   const saveKeyToKM = async (folderId, key) => {
     if (!masterPassword) return;
 
@@ -126,7 +145,8 @@ export const useKeyManager = (providerName, token, userEmail) => {
 
   const resetKM = () => {
     setMasterPassword(null);
-    setIsLocked(true);
+    setIsLocked(false);
+    setIsKMEnabled(false);
     setKmKeysList([]);
   };
 
@@ -135,8 +155,10 @@ export const useKeyManager = (providerName, token, userEmail) => {
     isLocked,
     kmKeysList,
     isInitialized,
+    masterPassword,
     performUnlock,
     toggleKeyManager,
+    changeMasterPassword,
     saveKeyToKM,
     removeKeyFromKM,
     isKeyInKM,
