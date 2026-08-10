@@ -152,7 +152,8 @@ const MessageItem = ({
                 <div className={styles.mediaContainer}>
                   {mediaUrl ? (
                     <>
-                      {mediaType === 'image' ? <img src={mediaUrl} alt="media" className={styles.mediaImage} /> : <video src={mediaUrl} controls className={styles.mediaVideo} />}
+                      {/* Added playsInline and webkit-playsinline for iOS compatibility */}
+                      {mediaType === 'image' ? <img src={mediaUrl} alt="media" className={styles.mediaImage} /> : <video src={mediaUrl} controls playsInline webkit-playsinline="true" className={styles.mediaVideo} />}
                       <button className={`${styles.mediaControlBtn} ${styles.mediaDownloadBtn}`} onClick={() => onDownload(msg)} title={t('chatPage.downloadFile')}>↓</button>
                       {mediaType === 'image' && <button className={`${styles.mediaControlBtn} ${styles.mediaFullscreenBtn}`} onClick={(e) => onFullscreen(e, mediaUrl)} title={t('fullscreen')}>⛶</button>}
                     </>

@@ -18,10 +18,10 @@ const MasterPasswordPage = ({ onSuccess, onDisable, providerName }) => {
       const success = await onSuccess(password);
       if (!success) {
         setError(t('masterPass.wrongPass'));
-        setIsLoading(false);
       }
     } catch (err) {
       setError(t('masterPass.wrongPass'));
+    } finally {
       setIsLoading(false);
     }
   };

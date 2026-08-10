@@ -91,6 +91,7 @@ export const useChatBackend = ({
   const previewAudioRef = useRef(null);
   const mediaStreamRef = useRef(null); 
   const facingModeRef = useRef('user');
+  const isRecorderStartedRef = useRef(false);
   
   const textareaRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -106,17 +107,6 @@ export const useChatBackend = ({
       setIsInitialLoading(false);
     }
   }, [isDecryptionFailed]);
-
-  useEffect(() => {
-    const checkDevices = async () => {
-      try {
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        const videoInputs = devices.filter(d => d.kind === 'videoinput');
-        setHasMultipleCameras(videoInputs.length > 1);
-      } catch (e) { console.error("Error checking devices", e); }
-    };
-    checkDevices();
-  }, []);
 
   const allHashtags = useMemo(() => {
     const tags = new Set();
@@ -399,7 +389,12 @@ export const useChatBackend = ({
 
   const handleSendMessage = async (text, file = null) => {
     if (isDecryptionFailedRef.current) return;
-    if (!text.trim() && !file) return; if (!chatKeyRef.current) return; setIsUploading(true);
+    if (!text.trim() && !file) return; if (!chatKeyRef.current) return;
+    
+    // Only block UI if a file is being uploaded, allow text input during upload
+    const isFileUpload = !!file;
+    if (isFileUpload) setIsUploading(true);
+
     const timestamp = new Date().toISOString(); const tempId = 'temp_' + Date.now();
     let replyToData = replyingTo ? { id: replyingTo.id, sender: replyingTo.sender, text: replyingTo.text, fileName: replyingTo.fileName } : null;
     const optimisticMessage = { id: tempId, text: filterSensitiveData(text), sender: userEmail, timestamp, linkFile: !!file, pending: true, fileName: file ? file.name : null, fileId: null, gifUrl: null, replyTo: replyToData };
@@ -426,7 +421,9 @@ export const useChatBackend = ({
       console.error('Send error:', err); if (localFileUrl) URL.revokeObjectURL(localFileUrl);
       setMessages(prev => { const rollbackList = prev.filter(m => m.id !== tempId); updateCache(chatId, { messages: rollbackList }); return rollbackList; });
       alert(t('error') + ': ' + err.message);
-    } finally { setIsUploading(false); }
+    } finally { 
+      if (isFileUpload) setIsUploading(false); 
+    }
   };
 
   const resetRecordingState = useCallback(() => {
@@ -435,48 +432,122 @@ export const useChatBackend = ({
     if (recordingIntervalRef.current) clearInterval(recordingIntervalRef.current);
     if (mediaStreamRef.current) { mediaStreamRef.current.getTracks().forEach(track => track.stop()); mediaStreamRef.current = null; }
     setRecordStream(null);
+    isRecorderStartedRef.current = false;
   }, [previewUrl]);
 
   const startRecordingStream = async (constraints, mode) => {
     if (isUploading || recordingStatus !== 'idle' || isDecryptionFailedRef.current) return;
     try {
+      isRecorderStartedRef.current = false;
       setRecordingMode(mode);
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      mediaStreamRef.current = stream; if (mode === 'video') setRecordStream(stream);
-      let mimeType = mode === 'video' ? 'video/webm;codecs=vp8,opus' : 'audio/mp4;codecs=aac';
-      if (!MediaRecorder.isTypeSupported(mimeType)) { mimeType = mode === 'video' ? 'video/webm' : 'audio/webm;codecs=opus'; if (!MediaRecorder.isTypeSupported(mimeType)) { mimeType = mode === 'video' ? 'video/mp4' : 'audio/webm'; } }
-      mediaRecorderRef.current = new MediaRecorder(stream, { mimeType });
-      audioChunksRef.current = [];
-      mediaRecorderRef.current.ondataavailable = (event) => { if (event.data.size > 0) audioChunksRef.current.push(event.data); };
-      mediaRecorderRef.current.onstop = () => {
-        if (mediaStreamRef.current) { mediaStreamRef.current.getTracks().forEach(track => track.stop()); mediaStreamRef.current = null; }
-        setRecordStream(null);
-        const blob = new Blob(audioChunksRef.current, { type: mediaRecorderRef.current.mimeType });
-        setRecordedBlob(blob); setPreviewUrl(URL.createObjectURL(blob)); setRecordingStatus('preview');
-      };
-      mediaRecorderRef.current.start(); setRecordingStatus('recording'); setRecordTime(0);
-      recordingIntervalRef.current = setInterval(() => setRecordTime(prev => prev + 1), 1000);
-    } catch (err) { console.error("Error accessing media devices:", err); alert(t('microphonePermissionDenied') || "Media access denied."); resetRecordingState(); }
+      mediaStreamRef.current = stream; 
+      if (mode === 'video') setRecordStream(stream);
+      
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videoInputs = devices.filter(d => d.kind === 'videoinput');
+        setHasMultipleCameras(videoInputs.length > 1);
+      } catch (e) { console.error("Error checking devices", e); }
+
+      setRecordingStatus('preparing'); 
+      setRecordTime(0);
+    } catch (err) { 
+      console.error("Error accessing media devices:", err); 
+      alert(t('microphonePermissionDenied') || "Media access denied."); 
+      resetRecordingState(); 
+    }
+  };
+
+  const beginRecording = () => {
+    if (isRecorderStartedRef.current || !mediaStreamRef.current || recordingStatus !== 'preparing') return;
+    isRecorderStartedRef.current = true;
+
+    const stream = mediaStreamRef.current;
+    let mimeType = recordingMode === 'video' ? 'video/webm;codecs=vp8,opus' : 'audio/mp4;codecs=aac';
+    if (!MediaRecorder.isTypeSupported(mimeType)) { 
+      mimeType = recordingMode === 'video' ? 'video/webm' : 'audio/webm;codecs=opus'; 
+      if (!MediaRecorder.isTypeSupported(mimeType)) { 
+        mimeType = recordingMode === 'video' ? 'video/mp4' : 'audio/webm'; 
+      } 
+    }
+    
+    mediaRecorderRef.current = new MediaRecorder(stream, { mimeType });
+    audioChunksRef.current = [];
+    
+    mediaRecorderRef.current.ondataavailable = (event) => { 
+      if (event.data.size > 0) audioChunksRef.current.push(event.data); 
+    };
+    
+    mediaRecorderRef.current.onstop = () => {
+      if (mediaStreamRef.current) { mediaStreamRef.current.getTracks().forEach(track => track.stop()); mediaStreamRef.current = null; }
+      setRecordStream(null);
+      const blob = new Blob(audioChunksRef.current, { type: mediaRecorderRef.current.mimeType });
+      setRecordedBlob(blob); setPreviewUrl(URL.createObjectURL(blob)); setRecordingStatus('preview');
+    };
+    
+    mediaRecorderRef.current.start(); 
+    setRecordingStatus('recording'); 
+    recordingIntervalRef.current = setInterval(() => setRecordTime(prev => prev + 1), 1000);
   };
 
   const handleStartAudioRecording = () => startRecordingStream({ audio: true }, 'audio');
-  const handleStartVideoRecording = () => { facingModeRef.current = 'user'; startRecordingStream({ audio: true, video: { facingMode: 'user' } }, 'video'); };
-
-  const handleSwitchCamera = async () => {
-    if (recordingStatus !== 'recording' || recordingMode !== 'video' || !mediaStreamRef.current || !hasMultipleCameras) return;
-    const newMode = facingModeRef.current === 'user' ? 'environment' : 'user';
-    facingModeRef.current = newMode;
-    try {
-      const newStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: newMode } });
-      const newVideoTrack = newStream.getVideoTracks()[0];
-      const currentStream = mediaStreamRef.current;
-      currentStream.getVideoTracks().forEach(track => { track.stop(); currentStream.removeTrack(track); });
-      currentStream.addTrack(newVideoTrack);
-      setRecordStream(new MediaStream(currentStream.getTracks()));
-    } catch (err) { console.error("Switch camera error:", err); alert(t('error') || "Failed to switch camera"); }
+  const handleStartVideoRecording = () => { 
+    facingModeRef.current = 'user'; 
+    startRecordingStream({ audio: true, video: { facingMode: 'user' } }, 'video'); 
   };
 
-  const stopRecording = () => { if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') mediaRecorderRef.current.stop(); clearInterval(recordingIntervalRef.current); };
+  const handleSwitchCamera = async () => {
+    if (recordingStatus !== 'recording' || recordingMode !== 'video' || !mediaStreamRef.current) return;
+    
+    const newMode = facingModeRef.current === 'user' ? 'environment' : 'user';
+    facingModeRef.current = newMode;
+    
+    try {
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+        mediaRecorderRef.current.onstop = null;
+        mediaRecorderRef.current.stop();
+      }
+
+      const oldVideoTracks = mediaStreamRef.current.getVideoTracks();
+      oldVideoTracks.forEach(track => { 
+        track.stop(); 
+        mediaStreamRef.current.removeTrack(track); 
+      });
+
+      const newStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: newMode } });
+      const newVideoTrack = newStream.getVideoTracks()[0];
+      mediaStreamRef.current.addTrack(newVideoTrack);
+
+      setRecordStream(new MediaStream(mediaStreamRef.current.getTracks()));
+
+      let mimeType = 'video/webm;codecs=vp8,opus';
+      if (!MediaRecorder.isTypeSupported(mimeType)) { mimeType = 'video/webm'; if (!MediaRecorder.isTypeSupported(mimeType)) { mimeType = 'video/mp4'; } }
+      
+      const newRecorder = new MediaRecorder(mediaStreamRef.current, { mimeType });
+      newRecorder.ondataavailable = (event) => { if (event.data.size > 0) audioChunksRef.current.push(event.data); };
+      
+      newRecorder.onstop = () => {
+        if (mediaStreamRef.current) { mediaStreamRef.current.getTracks().forEach(track => track.stop()); mediaStreamRef.current = null; }
+        setRecordStream(null);
+        const blob = new Blob(audioChunksRef.current, { type: newRecorder.mimeType });
+        setRecordedBlob(blob); setPreviewUrl(URL.createObjectURL(blob)); setRecordingStatus('preview');
+      };
+      
+      newRecorder.start();
+      mediaRecorderRef.current = newRecorder;
+    } catch (err) { 
+      console.error("Switch camera error:", err); 
+      alert(t('error') || "Failed to switch camera"); 
+    }
+  };
+
+  const stopRecording = () => { 
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+      mediaRecorderRef.current.stop(); 
+    }
+    if (recordingIntervalRef.current) clearInterval(recordingIntervalRef.current); 
+  };
 
   const handleSendRecordedMedia = () => {
     if (recordedBlob) {
@@ -510,7 +581,7 @@ export const useChatBackend = ({
     if (e.key === 'Enter' && !e.shiftKey) { if (!isMobile) { e.preventDefault(); handleSendMessage(inputValue); } }
   };
 
-  const handleAttach = () => { if (isDecryptionFailedRef.current) return; fileInputRef.current?.click(); };
+  const handleAttach = () => { if (isDecryptionFailedRef.current || isUploading) return; fileInputRef.current?.click(); };
   const handleFileChange = (e) => { const file = e.target.files[0]; if (!file) return; handleSendMessage(inputValue, file); if(fileInputRef.current) fileInputRef.current.value = ""; };
 
   const handleExportChat = useCallback(() => {
@@ -571,6 +642,7 @@ export const useChatBackend = ({
     handleSendMessage, handleDeleteMessage, handleViewMedia, handleDownloadFile, handleOpenFullscreen,
     handleCopyMessage, handleInputChange, handleKeyDown, handleAttach, handleFileChange,
     handleStartAudioRecording, handleStartVideoRecording, handleSwitchCamera, handleSendVoice: handleSendRecordedMedia,
+    beginRecording, 
     handleDeleteVoice, stopRecording, formatRecordTime, handleStartReply, handleCancelReply,
     handleToggleTextView,
     handleTextareaSelect, handleSelectHashtag, handleDragEnter, handleDragLeave, handleDragOver, handleDrop,

@@ -27,6 +27,7 @@ const ChatsPage = ({
 
   const isMountedRef = useRef(true);
   const loadingRef = useRef(new Set());
+  const avatarsRef = useRef({}); 
 
   useEffect(() => {
     isMountedRef.current = true;
@@ -35,16 +36,19 @@ const ChatsPage = ({
     };
   }, []);
 
-  // Clearing memory (Blob URLs) when unmounting a component
+  useEffect(() => {
+    avatarsRef.current = cachedAvatars;
+  }, [cachedAvatars]);
+
   useEffect(() => {
     return () => {
-      Object.values(cachedAvatars).forEach(url => {
-        if (url && url.startsWith('blob:')) {
+      Object.values(avatarsRef.current).forEach(url => {
+        if (url && typeof url === 'string' && url.startsWith('blob:')) {
           URL.revokeObjectURL(url);
         }
       });
     };
-  }, [cachedAvatars]);
+  }, []);
 
   useEffect(() => {
     setShowUpdateBtn(false);
@@ -67,17 +71,14 @@ const ChatsPage = ({
   useEffect(() => {
     if (isLoading || !api || !chats.length) return;
     
-    // We find chats that are not yet cached and are not in the process of loading
     const chatsToLoad = chats.filter(chat => 
-      cachedAvatars[chat.id] === undefined && !loadingRef.current.has(chat.id)
+      (cachedAvatars[chat.id] === undefined || cachedAvatars[chat.id] === 'failed') && !loadingRef.current.has(chat.id)
     );
 
     if (chatsToLoad.length === 0) return;
 
-    // Marking chats as downloadable
     chatsToLoad.forEach(chat => loadingRef.current.add(chat.id));
 
-    // Updating the UI (showing spinners)
     if (isMountedRef.current) {
       setLoadingAvatars(prev => {
         const next = { ...prev };
@@ -86,7 +87,6 @@ const ChatsPage = ({
       });
     }
 
-    // Upload all avatars in parallel
     const loadAvatars = async () => {
       const promises = chatsToLoad.map(async (chat) => {
         try {
@@ -97,7 +97,7 @@ const ChatsPage = ({
         } catch (err) {
           console.error(`Failed to load avatar for ${chat.name}:`, err);
           if (isMountedRef.current) {
-            onCacheAvatar(chat.id, null);
+            onCacheAvatar(chat.id, 'failed'); // Используем 'failed' вместо null для ретрая
           }
         } finally {
           loadingRef.current.delete(chat.id);
@@ -135,7 +135,6 @@ const ChatsPage = ({
     };
     onSelectChat(chatWithAvatar);
 
-    // Mark the chat as read to remove the red badge.
     if (chat.lastMessageTime) {
       const key = `elysium_seen_${providerName}_${userEmail}`;
       const newSeenHistory = { ...seenHistory, [chat.id]: Date.now() };
@@ -188,6 +187,7 @@ const ChatsPage = ({
             const lastVisit = seenHistory[chat.id] || 0;
             const hasNew = lastMsgTime > 0 && lastMsgTime > lastVisit;
             const formattedDate = formatLastMessageDate(chat.lastMessageTime);
+            const avatar = cachedAvatars[chat.id];
 
             return (
               <div 
@@ -200,9 +200,9 @@ const ChatsPage = ({
                     <div className={styles.avatarLoading}>
                       <div className={styles.avatarSpinner}></div>
                     </div>
-                  ) : cachedAvatars[chat.id] ? (
+                  ) : avatar && avatar !== 'failed' ? (
                     <img 
-                      src={cachedAvatars[chat.id]} 
+                      src={avatar} 
                       alt={chat.name} 
                       className={styles.avatarImage}
                     />

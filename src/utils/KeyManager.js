@@ -23,8 +23,6 @@ export const useKeyManager = (providerName, token, userEmail) => {
 
   useEffect(() => {
     if (!providerName || !userEmail) {
-      setIsKMEnabled(false);
-      setIsLocked(false);
       return;
     }
 
@@ -99,6 +97,12 @@ export const useKeyManager = (providerName, token, userEmail) => {
 
     try {
       const listToEncrypt = kmKeysList || [];
+      
+      if (listToEncrypt.length === 0 && localStorage.getItem(keys.data)) {
+        console.error("Aborting password change: keys list is empty but storage has data.");
+        return false;
+      }
+
       const newEncrypted = await encryptKMData(listToEncrypt, newPassword);
       localStorage.setItem(keys.data, newEncrypted);
       

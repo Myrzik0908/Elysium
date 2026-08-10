@@ -256,3 +256,21 @@
   margin: 0; 
   font-weight: 500;
 }
+
+.dateSeparator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px 0 10px 0;
+  width: 100%;
+}
+
+.dateSeparatorText {
+  background-color: rgba(0, 0, 0, 0.05); 
+  color: #888; 
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: 12px;
+  user-select: none;
+}

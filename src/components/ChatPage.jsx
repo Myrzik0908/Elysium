@@ -17,6 +17,16 @@ const MessageSkeleton = ({ isOwn }) => {
   );
 };
 
+// Formats timestamp to DD.MM.YYYY
+const formatDateSeparator = (timestamp) => {
+  if (!timestamp) return '';
+  const date = new Date(timestamp);
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}.${month}.${year}`;
+};
+
 const ChatPage = ({ chatId, chatName: propChatName, avatarUrl: propAvatarUrl, decryptionKey, api, onBack, userEmail, onOpenProfile, onOpenEditChat, providerName }) => {
   const { t } = useTranslation();
   const currentChatName = propChatName || t('chat');
@@ -33,16 +43,23 @@ const ChatPage = ({ chatId, chatName: propChatName, avatarUrl: propAvatarUrl, de
   const [isVideoReady, setIsVideoReady] = useState(false);
 
   useEffect(() => {
-    if (backend.recordingStatus === 'recording' && backend.recordingMode === 'video' && backend.recordStream) {
+    if ((backend.recordingStatus === 'preparing' || backend.recordingStatus === 'recording') && backend.recordingMode === 'video' && backend.recordStream) {
       if (liveVideoRef.current && liveVideoRef.current.srcObject !== backend.recordStream) {
         liveVideoRef.current.srcObject = backend.recordStream;
+        liveVideoRef.current.play().catch(err => console.error("Error playing video:", err));
       }
     }
   }, [backend.recordingStatus, backend.recordingMode, backend.recordStream]);
 
   useEffect(() => {
-    if (backend.recordingStatus !== 'recording') setIsVideoReady(false);
+    if (backend.recordingStatus !== 'recording' && backend.recordingStatus !== 'preparing') {
+      setIsVideoReady(false);
+    }
   }, [backend.recordingStatus]);
+
+  useEffect(() => {
+    setIsVideoReady(false);
+  }, [backend.recordStream]);
 
   useEffect(() => {
     if (!backend.isInitialLoading && !backend.isDecryptionFailed) {
@@ -84,12 +101,22 @@ const ChatPage = ({ chatId, chatName: propChatName, avatarUrl: propAvatarUrl, de
   const messageVariants = { hidden: { opacity: 0, y: 20, scale: 0.95 }, visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.3 } }, exit: { opacity: 0, scale: 0.9, transition: { duration: 0.2 } } };
   const skeletonPattern = [false, true, true, false, true, false, false, true, false, true];
 
+  const showVideoOverlay = (backend.recordingStatus === 'preparing' || backend.recordingStatus === 'recording') && backend.recordingMode === 'video';
+
   return (
     <motion.div className={styles.container} drag={isDragEnabled ? "x" : false} dragConstraints={{ left: 0, right: 0 }} dragElastic={{ left: 0, right: 0.5 }} onDragEnd={handleDragEnd} style={{ touchAction: isDragEnabled ? 'pan-y' : 'auto' }} onPointerDown={handlePointerDown} onDragEnter={backend.handleDragEnter} onDragLeave={backend.handleDragLeave} onDragOver={backend.handleDragOver} onDrop={backend.handleDrop}>
       
-      {backend.recordingStatus === 'recording' && backend.recordingMode === 'video' && (
+      {showVideoOverlay && (
         <div className={styles.fullscreenVideoOverlay}>
-          <video autoPlay muted playsInline ref={liveVideoRef} onPlay={() => setIsVideoReady(true)} className={`${styles.fullscreenVideo} ${isVideoReady ? styles.videoReady : ''}`} />
+          <video 
+            autoPlay 
+            muted 
+            playsInline 
+            ref={liveVideoRef} 
+            onPlay={() => setIsVideoReady(true)} 
+            onLoadedData={() => backend.beginRecording()} 
+            className={`${styles.fullscreenVideo} ${isVideoReady ? styles.videoReady : ''}`} 
+          />
           <div className={styles.videoControlsTop}>
             <div className={styles.recordingVideoTimer}><span className={styles.recordingDot}></span>{backend.formatRecordTime(backend.recordTime)}</div>
             {backend.hasMultipleCameras && (<button className={styles.switchCameraBtn} onClick={backend.handleSwitchCamera}>🔄</button>)}
@@ -133,9 +160,23 @@ const ChatPage = ({ chatId, chatName: propChatName, avatarUrl: propAvatarUrl, de
           <>
             {backend.isInitialLoading && (<>{skeletonPattern.map((isOwn, index) => (<MessageSkeleton key={index} isOwn={isOwn} />))}</>)}
             <AnimatePresence initial={false}>
-              {!backend.isInitialLoading && backend.messages.map((msg) => {
+              {!backend.isInitialLoading && backend.messages.flatMap((msg, index) => {
+                const currentDateString = formatDateSeparator(msg.timestamp);
+                const prevDateString = index > 0 ? formatDateSeparator(backend.messages[index - 1].timestamp) : null;
+                const showDateSeparator = currentDateString !== prevDateString;
+
+                const nodes = [];
+                
+                if (showDateSeparator) {
+                  nodes.push(
+                    <div className={styles.dateSeparator} key={`date-${currentDateString}-${msg.id}`}>
+                      <span className={styles.dateSeparatorText}>{currentDateString}</span>
+                    </div>
+                  );
+                }
+
                 const profile = backend.userProfiles[msg.sender] || {};
-                return (
+                nodes.push(
                   <motion.div key={msg.id} variants={messageVariants} initial="hidden" animate="visible" exit="exit" layout>
                     <MessageItem 
                       msg={msg} userEmail={userEmail} profile={profile} userProfiles={backend.userProfiles} 
@@ -151,6 +192,8 @@ const ChatPage = ({ chatId, chatName: propChatName, avatarUrl: propAvatarUrl, de
                     />
                   </motion.div>
                 );
+
+                return nodes;
               })}
             </AnimatePresence>
             <div ref={messagesEndRef} />
@@ -175,7 +218,7 @@ const ChatPage = ({ chatId, chatName: propChatName, avatarUrl: propAvatarUrl, de
               {backend.recordingStatus === 'preview' && (
                 <>
                   <div className={styles.inputContainer}>
-                    {backend.recordingMode === 'video' && backend.previewUrl ? (<video controls className={styles.previewVideo} src={backend.previewUrl} autoPlay>Video</video>) : (<div className={styles.audioPreviewWrapper}><audio key={backend.previewUrl} controls className={styles.previewAudioPlayer} src={backend.previewUrl} ref={backend.previewAudioRef}>Audio</audio></div>)}
+                    {backend.recordingMode === 'video' && backend.previewUrl ? (<video controls playsInline className={styles.previewVideo} src={backend.previewUrl} autoPlay>Video</video>) : (<div className={styles.audioPreviewWrapper}><audio key={backend.previewUrl} controls className={styles.previewAudioPlayer} src={backend.previewUrl} ref={backend.previewAudioRef}>Audio</audio></div>)}
                   </div>
                   <div className={styles.previewActions}>
                       <button className={styles.previewBtn} onClick={backend.handleDeleteVoice} title={t('delete')}>🗑️</button>
@@ -188,17 +231,19 @@ const ChatPage = ({ chatId, chatName: propChatName, avatarUrl: propAvatarUrl, de
                 <>
                   <button className={styles.attachButton} onClick={backend.handleAttach} disabled={backend.isUploading}>📎</button>
                   <div className={styles.inputContainer}>
-                    <textarea ref={backend.textareaRef} className={styles.input} placeholder={backend.isUploading ? t('chatPage.uploadingFile') : t('chatPage.messagePlaceholder')} value={backend.inputValue} onChange={backend.handleInputChange} onSelect={backend.handleTextareaSelect} onKeyDown={backend.handleKeyDown} onBlur={backend.handleInputBlur} disabled={backend.isUploading} rows={1} />
+                    <textarea ref={backend.textareaRef} className={styles.input} placeholder={t('chatPage.messagePlaceholder')} value={backend.inputValue} onChange={backend.handleInputChange} onSelect={backend.handleTextareaSelect} onKeyDown={backend.handleKeyDown} onBlur={backend.handleInputBlur} rows={1} />
                   </div>
                   <div className={styles.actionButtonsContainer}>
-                    {backend.hasText && !backend.isUploading ? (
+                    {backend.hasText ? (
                       <button className={`${styles.sendButton} ${styles.sendButtonActive}`} onClick={() => backend.handleSendMessage(backend.inputValue)} title={t('send')}>➤</button>
-                    ) : !backend.isUploading ? (
+                    ) : backend.isUploading ? (
+                      <div className={`${styles.spinner} ${styles.spinnerSmall}`}></div>
+                    ) : (
                       <>
                         <button className={styles.micButton} onClick={backend.handleStartAudioRecording} title={t('audioMessage')}>🎤</button>
                         <button className={styles.micButton} onClick={backend.handleStartVideoRecording} title={t('videoMessage')}>🎥</button>
                       </>
-                    ) : null}
+                    )}
                   </div>
                 </>
               )}

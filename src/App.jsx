@@ -37,12 +37,31 @@ const PROVIDERS_MAP = {
 
 const pageVariants = {
   initial: (direction) => ({ x: direction > 0 ? '100%' : '-100%', opacity: 0, position: 'absolute', width: '100%', height: '100%', top: 0, left: 0 }),
-  animate: { x: 0, opacity: 1, position: 'relative', width: '100%', height: 'auto', top: 'auto', left: 'auto', transition: { duration: 0.09, ease: 'easeOut' } },
-  exit: (direction) => ({ x: direction > 0 ? '-100%' : '100%', opacity: 0, position: 'absolute', width: '100%', height: '100%', top: 0, left: 0, transition: { duration: 0.08, ease: 'easeIn' } })
+  animate: { x: 0, opacity: 1, position: 'relative', width: '100%', height: 'auto', top: 'auto', left: 'auto', transition: { duration: 0.2, ease: 'easeOut' } },
+  exit: (direction) => ({ x: direction > 0 ? '-100%' : '100%', opacity: 0, position: 'absolute', width: '100%', height: '100%', top: 0, left: 0, transition: { duration: 0.15, ease: 'easeIn' } })
 };
 
 function AppContent() {
   const { t } = useTranslation();
+  
+  const initialHash = window.location.hash;
+  if (initialHash.includes('access_token')) {
+    const params = new URLSearchParams(initialHash.substring(1));
+    const accessToken = params.get('access_token');
+    const provider = params.get('state') || 'google';
+    const expiresIn = params.get('expires_in');
+    
+    if (accessToken) {
+      sessionStorage.setItem('elysium_access_token', accessToken);
+      sessionStorage.setItem('elysium_provider', provider);
+      
+      const expirationSeconds = expiresIn ? parseInt(expiresIn, 10) : 3600;
+      const expiresAt = Date.now() + expirationSeconds * 1000;
+      sessionStorage.setItem('elysium_expires_at', expiresAt);
+      
+      window.history.replaceState(null, '', '#/');
+    }
+  }
   
   const [clientIds, setClientIds] = useState({});
   const [currentScreen, setCurrentScreen] = useState('welcome');
@@ -134,10 +153,20 @@ function AppContent() {
       setChats(loadedChats);
     } catch (error) {
       console.error('Cloud initialization failed:', error);
-      alert(t('error'));
-      if (!isKMEnabled) {
-        setCurrentScreen('welcome');
-      }
+      
+      sessionStorage.removeItem('elysium_access_token');
+      sessionStorage.removeItem('elysium_provider');
+      sessionStorage.removeItem('elysium_expires_at');
+      setApi(null);
+      setToken(null);
+      setProviderName(null);
+      
+      setCurrentScreen((prev) => {
+        if (prev === 'welcome' || prev === 'chats') {
+          return 'welcome';
+        }
+        return prev;
+      });
     } finally {
       setIsLoading(false);
       isInitializing.current = false;
@@ -154,7 +183,7 @@ function AppContent() {
 
   const revokeAvatars = (avatarsObj) => {
     Object.values(avatarsObj).forEach(url => {
-      if (url && url.startsWith('blob:')) {
+      if (url && typeof url === 'string' && url.startsWith('blob:')) {
         URL.revokeObjectURL(url);
       }
     });
@@ -315,7 +344,7 @@ function AppContent() {
     try {
       if (data.publicAvatar) {
         await api.updateChatAvatar(activeChat.id, decryptionKey, data.publicAvatar, true);
-        if (cachedAvatars[activeChat.id] && cachedAvatars[activeChat.id].startsWith('blob:')) {
+        if (cachedAvatars[activeChat.id] && typeof cachedAvatars[activeChat.id] === 'string' && cachedAvatars[activeChat.id].startsWith('blob:')) {
           URL.revokeObjectURL(cachedAvatars[activeChat.id]);
         }
         setCachedAvatars(prev => {
@@ -346,7 +375,9 @@ function AppContent() {
           if(isKMEnabled) await removeKeyFromKM(activeChat.id);
           
           if (cachedAvatars[activeChat.id]) {
-            URL.revokeObjectURL(cachedAvatars[activeChat.id]);
+            if (typeof cachedAvatars[activeChat.id] === 'string' && cachedAvatars[activeChat.id].startsWith('blob:')) {
+              URL.revokeObjectURL(cachedAvatars[activeChat.id]);
+            }
             setCachedAvatars(prev => {
               const next = { ...prev };
               delete next[activeChat.id];
