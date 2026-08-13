@@ -3,6 +3,14 @@ import { useTranslation } from 'react-i18next';
 import styles from './styles/ChatPage.module.css';
 import { getMediaType } from '../context/ChatBackend'; 
 
+const isEmojiOnly = (text) => {
+  if (!text) return false;
+  const cleanText = text.replace(/\s/g, '');
+  if (!cleanText) return false;
+  const emojiRegex = /^(\p{Regional_Indicator}\p{Regional_Indicator}|\p{Emoji}(\u200D\p{Emoji})*(\uFE0F|\u20E3)?)+$/u;
+  return emojiRegex.test(cleanText);
+};
+
 const MessageItem = ({ 
   msg, 
   userEmail, 
@@ -56,13 +64,15 @@ const MessageItem = ({
   const isViewingText = viewingTextIds?.has(msg.id);
   const isLoadingText = loadingTextIds?.has(msg.id);
   const mediaType = msg.linkFile ? getMediaType(msg.fileName) : null;
+  
+  const emojiOnly = !msg.linkFile && !msg.gifUrl && isEmojiOnly(msg.text);
 
   return (
     <div 
       className={`${styles.messageWrapper} ${isOwn ? styles.ownMessageWrapper : styles.otherMessageWrapper}`}
       id={`msg-${msg.id}`}
     >
-      {!isOwn && (
+      {!isOwn && !emojiOnly && (
         <div className={styles.messageAvatar}>
           {areProfilesLoading ? (
             <div className={styles.senderAvatarLoading}></div>
@@ -74,7 +84,7 @@ const MessageItem = ({
         </div>
       )}
 
-      <div className={`${styles.messageBubble} ${isOwn ? styles.ownBubble : styles.otherBubble} ${msg.pending ? styles.pendingBubble : ''}`}>
+      <div className={`${styles.messageBubble} ${isOwn ? styles.ownBubble : styles.otherBubble} ${msg.pending ? styles.pendingBubble : ''} ${emojiOnly ? styles.emojiOnlyBubble : ''}`}>
         
         {msg.replyTo && (
           <div className={styles.replyContainer} onClick={() => onScrollToMessage && onScrollToMessage(msg.replyTo.id)}>
@@ -86,7 +96,7 @@ const MessageItem = ({
           </div>
         )}
 
-        {!isOwn && <span className={styles.senderNameInside}>{displayName}</span>}
+        {!isOwn && !emojiOnly && <span className={styles.senderNameInside}>{displayName}</span>}
 
         {msg.linkFile ? (
           (() => {
@@ -152,7 +162,6 @@ const MessageItem = ({
                 <div className={styles.mediaContainer}>
                   {mediaUrl ? (
                     <>
-                      {/* Added playsInline and webkit-playsinline for iOS compatibility */}
                       {mediaType === 'image' ? <img src={mediaUrl} alt="media" className={styles.mediaImage} /> : <video src={mediaUrl} controls playsInline webkit-playsinline="true" className={styles.mediaVideo} />}
                       <button className={`${styles.mediaControlBtn} ${styles.mediaDownloadBtn}`} onClick={() => onDownload(msg)} title={t('chatPage.downloadFile')}>↓</button>
                       {mediaType === 'image' && <button className={`${styles.mediaControlBtn} ${styles.mediaFullscreenBtn}`} onClick={(e) => onFullscreen(e, mediaUrl)} title={t('fullscreen')}>⛶</button>}
@@ -190,7 +199,7 @@ const MessageItem = ({
         )}
         
         <div className={styles.messageFooter}>
-          {!isOwn && !msg.pending && (
+          {!msg.pending && (
             <button className={styles.replyButton} onClick={() => onReply && onReply(msg)} title={t('reply')}>↩️</button>
           )}
 
@@ -204,7 +213,7 @@ const MessageItem = ({
             </button>
           )}
 
-          {!msg.linkFile && (
+          {!msg.linkFile && !emojiOnly && (
             <button className={styles.copyButton} onClick={() => onCopy(msg.text, msg.id)} title={t('copy')}>
               {copiedMessageId === msg.id ? '✅' : '📋'}
             </button>

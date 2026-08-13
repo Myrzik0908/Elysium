@@ -5,6 +5,7 @@
   color: #222;
   padding: 20px;
   scroll-behavior: smooth;
+  position: relative;
 }
 
 .content {
@@ -53,7 +54,7 @@
   top: 0;
   background-color: rgba(255, 249, 230, 0.6);
   padding: 15px 0;
-  z-index: 10;
+  z-index: 20;
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
   border-bottom: 1px solid rgba(0,0,0,0.04);
@@ -71,6 +72,9 @@
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 2px 8px rgba(0,0,0,0.03);
   backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .tabBtn:hover {
@@ -83,6 +87,73 @@
   transform: translateY(0) scale(0.98);
   box-shadow: 0 1px 3px rgba(0,0,0,0.04);
   background: rgba(255, 255, 255, 0.6);
+}
+
+.langMenuWrapper {
+  position: relative;
+}
+
+.langBtn {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+.langBackdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: transparent;
+  z-index: 15;
+}
+
+.langDropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  padding: 10px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  z-index: 25;
+  border: 1px solid rgba(0,0,0,0.05);
+  min-width: 220px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.langDropdownItem {
+  padding: 10px 12px;
+  border: none;
+  background: transparent;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.2s;
+  width: 100%;
+  text-align: left;
+  color: #222;
+  font-weight: 500;
+}
+
+.langDropdownItem:hover {
+  background: #f5f5f5;
+}
+
+.langDropdownItemActive {
+  background: #FFF9C4;
+  font-weight: 600;
 }
 
 .sections {
@@ -232,5 +303,13 @@
   
   .card {
     padding: 20px;
+  }
+
+  .langDropdown {
+    right: 50%;
+    transform: translateX(50%);
+    grid-template-columns: 1fr;
+    min-width: 0;
+    width: 100%;
   }
 }

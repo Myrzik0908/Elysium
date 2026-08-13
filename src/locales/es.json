@@ -55,12 +55,12 @@
       "androidInst4": "Establezca \"http://localhost:8000\" en la configuración. Haga clic en \"Start server\".",
       "androidInst5": "Abra el navegador y vaya a la dirección",
       "iosTitle": "iOS",
-      "iosRec": "Recomendamos usar \"Documents by Readdle\".",
-      "iosInst1": "Instale la aplicación.",
-      "iosInst2": "Copie los archivos del proyecto Elysium en la aplicación Documents.",
-      "iosInst3": "Abra Documents, vaya a Configuración.",
-      "iosInst4": "Habilite \"Web Server\".",
-      "iosInst5": "La aplicación mostrará una URL. Abra Safari y navegue a esa URL.",
+      "iosRec": "Recomendamos usar la terminal \"a-Shell\".",
+      "iosInst1": "En la aplicación \"Archivos\", mueve la carpeta del proyecto Elysium a la carpeta a-Shell.",
+      "iosInst2": "Abre a-Shell e ingresa: cd Documents",
+      "iosInst3": "Inicia el servidor con: python -m http.server 8000",
+      "iosInst4": "Minimiza a-Shell (déjalo en segundo plano) y abre Safari.",
+      "iosInst5": "En Safari, ingresa: http://127.0.0.1:8000",
       "footer": "Después de iniciar el servidor, abra http://localhost:8000 en su navegador."
     },
     "userAgreement": {

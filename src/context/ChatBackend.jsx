@@ -32,12 +32,11 @@ const isCryptoError = (e) => {
 };
 
 export const useChatBackend = ({ 
-  chatId, decryptionKey, api, userEmail, providerName 
+  chatId, decryptionKey, api, userEmail, providerName, liveVideoRef, canvasRef 
 }) => {
   const { t } = useTranslation();
   const { state, updateCache } = useChatCache();
   
-  // --- State ---
   const [messages, setMessages] = useState([]);
   const [lastTimestamp, setLastTimestamp] = useState(null);
   const [userProfiles, setUserProfiles] = useState({});
@@ -70,14 +69,12 @@ export const useChatBackend = ({
   const [hasMultipleCameras, setHasMultipleCameras] = useState(false);
 
   const [isDragging, setIsDragging] = useState(false);
-  
   const [isDecryptionFailed, setIsDecryptionFailed] = useState(false);
   
   const [loadedFileTexts, setLoadedFileTexts] = useState({});
   const [loadingTextIds, setLoadingTextIds] = useState(new Set());
   const [viewingTextIds, setViewingTextIds] = useState(new Set());
 
-  // --- Refs ---
   const isLoadingRef = useRef(false);
   const lastTimestampRef = useRef(lastTimestamp);
   const chatKeyRef = useRef(chatKey);
@@ -92,6 +89,7 @@ export const useChatBackend = ({
   const mediaStreamRef = useRef(null); 
   const facingModeRef = useRef('user');
   const isRecorderStartedRef = useRef(false);
+  const rafRef = useRef(null);
   
   const textareaRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -161,6 +159,7 @@ export const useChatBackend = ({
   useEffect(() => {
     return () => {
       if (recordingIntervalRef.current) clearInterval(recordingIntervalRef.current);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
       if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') mediaRecorderRef.current.stop();
       if (mediaStreamRef.current) mediaStreamRef.current.getTracks().forEach(t => t.stop());
       if (previewUrl) URL.revokeObjectURL(previewUrl);
@@ -391,7 +390,6 @@ export const useChatBackend = ({
     if (isDecryptionFailedRef.current) return;
     if (!text.trim() && !file) return; if (!chatKeyRef.current) return;
     
-    // Only block UI if a file is being uploaded, allow text input during upload
     const isFileUpload = !!file;
     if (isFileUpload) setIsUploading(true);
 
@@ -430,6 +428,7 @@ export const useChatBackend = ({
     setRecordingStatus('idle'); setRecordTime(0); setRecordedBlob(null);
     if (previewUrl) URL.revokeObjectURL(previewUrl); setPreviewUrl(null);
     if (recordingIntervalRef.current) clearInterval(recordingIntervalRef.current);
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
     if (mediaStreamRef.current) { mediaStreamRef.current.getTracks().forEach(track => track.stop()); mediaStreamRef.current = null; }
     setRecordStream(null);
     isRecorderStartedRef.current = false;
@@ -452,6 +451,10 @@ export const useChatBackend = ({
 
       setRecordingStatus('preparing'); 
       setRecordTime(0);
+      
+      if (mode === 'audio') {
+        beginRecording();
+      }
     } catch (err) { 
       console.error("Error accessing media devices:", err); 
       alert(t('microphonePermissionDenied') || "Media access denied."); 
@@ -459,11 +462,36 @@ export const useChatBackend = ({
     }
   };
 
+  const drawFrame = () => {
+    if (liveVideoRef.current && canvasRef.current && liveVideoRef.current.readyState >= 2) {
+      const video = liveVideoRef.current;
+      const canvas = canvasRef.current;
+      if (canvas.width !== video.videoWidth) canvas.width = video.videoWidth;
+      if (canvas.height !== video.videoHeight) canvas.height = video.videoHeight;
+      canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+    }
+    rafRef.current = requestAnimationFrame(drawFrame);
+  };
+
   const beginRecording = () => {
-    if (isRecorderStartedRef.current || !mediaStreamRef.current || recordingStatus !== 'preparing') return;
+    if (isRecorderStartedRef.current || !mediaStreamRef.current) return;
     isRecorderStartedRef.current = true;
 
-    const stream = mediaStreamRef.current;
+    let streamToRecord = mediaStreamRef.current;
+    
+    if (recordingMode === 'video' && canvasRef.current && liveVideoRef.current) {
+      const video = liveVideoRef.current;
+      const canvas = canvasRef.current;
+      canvas.width = video.videoWidth || 640;
+      canvas.height = video.videoHeight || 480;
+      
+      drawFrame();
+      
+      streamToRecord = canvas.captureStream(30);
+      const audioTracks = mediaStreamRef.current.getAudioTracks();
+      audioTracks.forEach(track => streamToRecord.addTrack(track));
+    }
+
     let mimeType = recordingMode === 'video' ? 'video/webm;codecs=vp8,opus' : 'audio/mp4;codecs=aac';
     if (!MediaRecorder.isTypeSupported(mimeType)) { 
       mimeType = recordingMode === 'video' ? 'video/webm' : 'audio/webm;codecs=opus'; 
@@ -472,7 +500,7 @@ export const useChatBackend = ({
       } 
     }
     
-    mediaRecorderRef.current = new MediaRecorder(stream, { mimeType });
+    mediaRecorderRef.current = new MediaRecorder(streamToRecord, { mimeType });
     audioChunksRef.current = [];
     
     mediaRecorderRef.current.ondataavailable = (event) => { 
@@ -480,6 +508,7 @@ export const useChatBackend = ({
     };
     
     mediaRecorderRef.current.onstop = () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
       if (mediaStreamRef.current) { mediaStreamRef.current.getTracks().forEach(track => track.stop()); mediaStreamRef.current = null; }
       setRecordStream(null);
       const blob = new Blob(audioChunksRef.current, { type: mediaRecorderRef.current.mimeType });
@@ -504,11 +533,6 @@ export const useChatBackend = ({
     facingModeRef.current = newMode;
     
     try {
-      if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
-        mediaRecorderRef.current.onstop = null;
-        mediaRecorderRef.current.stop();
-      }
-
       const oldVideoTracks = mediaStreamRef.current.getVideoTracks();
       oldVideoTracks.forEach(track => { 
         track.stop(); 
@@ -520,22 +544,6 @@ export const useChatBackend = ({
       mediaStreamRef.current.addTrack(newVideoTrack);
 
       setRecordStream(new MediaStream(mediaStreamRef.current.getTracks()));
-
-      let mimeType = 'video/webm;codecs=vp8,opus';
-      if (!MediaRecorder.isTypeSupported(mimeType)) { mimeType = 'video/webm'; if (!MediaRecorder.isTypeSupported(mimeType)) { mimeType = 'video/mp4'; } }
-      
-      const newRecorder = new MediaRecorder(mediaStreamRef.current, { mimeType });
-      newRecorder.ondataavailable = (event) => { if (event.data.size > 0) audioChunksRef.current.push(event.data); };
-      
-      newRecorder.onstop = () => {
-        if (mediaStreamRef.current) { mediaStreamRef.current.getTracks().forEach(track => track.stop()); mediaStreamRef.current = null; }
-        setRecordStream(null);
-        const blob = new Blob(audioChunksRef.current, { type: newRecorder.mimeType });
-        setRecordedBlob(blob); setPreviewUrl(URL.createObjectURL(blob)); setRecordingStatus('preview');
-      };
-      
-      newRecorder.start();
-      mediaRecorderRef.current = newRecorder;
     } catch (err) { 
       console.error("Switch camera error:", err); 
       alert(t('error') || "Failed to switch camera"); 

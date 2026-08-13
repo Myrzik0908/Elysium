@@ -1,13 +1,34 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styles from './styles/GettingStartedPage.module.css';
 
 const GettingStartedPage = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const [isLangOpen, setIsLangOpen] = useState(false);
   
   const desktopRef = useRef(null);
   const androidRef = useRef(null);
   const iosRef = useRef(null);
+
+  const languages = [
+    { code: 'en', name: 'EN', flag: '🇬🇧' },
+    { code: 'zh', name: '中文', flag: '🇨🇳' },
+    { code: 'ru', name: 'RU', flag: '🇷🇺' },
+    { code: 'hi', name: 'हिंदी', flag: '🇮🇳' },
+    { code: 'es', name: 'ES', flag: '🇪🇸' },
+    { code: 'fr', name: 'FR', flag: '🇫🇷' },
+    { code: 'ar', name: 'AR', flag: '🇸🇦' },
+    { code: 'bn', name: 'BN', flag: '🇧🇩' },
+    { code: 'pt', name: 'PT', flag: '🇧🇷' },
+    { code: 'ur', name: 'UR', flag: '🇵🇰' }
+  ];
+
+  const currentLang = languages.find(l => l.code === i18n.language) || languages[0];
+
+  const changeLanguage = (lng) => {
+    i18n.changeLanguage(lng);
+    setIsLangOpen(false);
+  };
 
   const scrollToSection = (ref) => {
     ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -15,6 +36,8 @@ const GettingStartedPage = () => {
 
   return (
     <div className={styles.container}>
+      {isLangOpen && <div className={styles.langBackdrop} onClick={() => setIsLangOpen(false)} />}
+      
       <div className={styles.content}>
         <header className={styles.header}>
           <h1 className={styles.title}>{t('gettingStarted.title')}</h1>
@@ -34,6 +57,29 @@ const GettingStartedPage = () => {
           <button className={styles.tabBtn} onClick={() => scrollToSection(iosRef)}>
             {t('gettingStarted.tabs.ios')}
           </button>
+
+          <div className={styles.langMenuWrapper}>
+            <button 
+              className={`${styles.tabBtn} ${styles.langBtn}`} 
+              onClick={() => setIsLangOpen(!isLangOpen)}
+            >
+              {currentLang.flag} {currentLang.name} ▾
+            </button>
+            
+            {isLangOpen && (
+              <div className={styles.langDropdown}>
+                {languages.map((lang) => (
+                  <button
+                    key={lang.code}
+                    onClick={() => changeLanguage(lang.code)}
+                    className={`${styles.langDropdownItem} ${i18n.language === lang.code ? styles.langDropdownItemActive : ''}`}
+                  >
+                    {lang.flag} {lang.name}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </nav>
 
         <div className={styles.sections}>
@@ -104,7 +150,7 @@ const GettingStartedPage = () => {
             
             <div className={styles.card}>
               <p>{t('gettingStarted.iosRec')}</p>
-              <a href="https://apps.apple.com/app/documents-file-manager-docs/id364901807" target="_blank" rel="noreferrer" className={styles.storeLink}>
+              <a href="https://apps.apple.com/us/app/a-shell/id1473805438" target="_blank" rel="noreferrer" className={styles.storeLink}>
                 Download on App Store
               </a>
 

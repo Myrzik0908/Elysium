@@ -184,12 +184,12 @@
       "androidInst4": "Set \"http://localhost:8000\" in the settings. Click \"Start server\".",
       "androidInst5": "Open the browser and go to the address",
       "iosTitle": "iOS",
-      "iosRec": "We recommend using \"Documents by Readdle\".",
-      "iosInst1": "Install the app.",
-      "iosInst2": "Copy the Elysium project files into the Documents app.",
-      "iosInst3": "Open Documents, go to Settings (Gear icon).",
-      "iosInst4": "Enable \"Web Server\" (or \"Wi-Fi Transfer\").",
-      "iosInst5": "The app will display a URL. Open Safari and navigate to that URL.",
+      "iosRec": "We recommend using the \"a-Shell\" terminal.",
+      "iosInst1": "In the \"Files\" app, move the Elysium project folder to the a-Shell folder.",
+      "iosInst2": "Open a-Shell and enter: cd Documents",
+      "iosInst3": "Start the server with: python -m http.server 8000",
+      "iosInst4": "Minimize a-Shell (keep it running) and open Safari.",
+      "iosInst5": "In Safari, enter: http://127.0.0.1:8000",
       "footer": "After starting the server, open http://localhost:8000 (or the address shown by the app) in your browser."
     },
 

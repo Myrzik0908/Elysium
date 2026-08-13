@@ -17,7 +17,6 @@ const MessageSkeleton = ({ isOwn }) => {
   );
 };
 
-// Formats timestamp to DD.MM.YYYY
 const formatDateSeparator = (timestamp) => {
   if (!timestamp) return '';
   const date = new Date(timestamp);
@@ -30,7 +29,11 @@ const formatDateSeparator = (timestamp) => {
 const ChatPage = ({ chatId, chatName: propChatName, avatarUrl: propAvatarUrl, decryptionKey, api, onBack, userEmail, onOpenProfile, onOpenEditChat, providerName }) => {
   const { t } = useTranslation();
   const currentChatName = propChatName || t('chat');
-  const backend = useChatBackend({ chatId, decryptionKey, api, userEmail, providerName });
+  
+  const liveVideoRef = useRef(null);
+  const canvasRef = useRef(null);
+  
+  const backend = useChatBackend({ chatId, decryptionKey, api, userEmail, providerName, liveVideoRef, canvasRef });
 
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
@@ -38,7 +41,6 @@ const ChatPage = ({ chatId, chatName: propChatName, avatarUrl: propAvatarUrl, de
   const [isDragEnabled, setIsDragEnabled] = useState(true);
   const dragStartTargetRef = useRef(null); 
   const [currentUserImgError, setCurrentUserImgError] = useState(false);
-  const liveVideoRef = useRef(null);
   
   const [isVideoReady, setIsVideoReady] = useState(false);
 
@@ -72,6 +74,7 @@ const ChatPage = ({ chatId, chatName: propChatName, avatarUrl: propAvatarUrl, de
     const { scrollTop, scrollHeight, clientHeight } = e.target;
     if (scrollHeight - scrollTop - clientHeight > 200) setShowScrollButton(true); else setShowScrollButton(false);
   };
+  
   const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   const scrollToMessage = (id) => {
     const element = document.getElementById(`msg-${id}`);
@@ -96,7 +99,18 @@ const ChatPage = ({ chatId, chatName: propChatName, avatarUrl: propAvatarUrl, de
   };
 
   const handleDragEnd = (event, info) => { if (dragStartTargetRef.current && dragStartTargetRef.current.closest(`.${styles.messageBubble}`)) return; if (info.offset.x > 100 || (info.velocity.x > 300 && info.offset.x > 20)) onBack(); };
-  const handlePointerDown = (e) => { if (backend.isDecryptionFailed) return; dragStartTargetRef.current = e.target; if (e.target.closest(`.${styles.messageBubble}`)) setIsDragEnabled(false); else setIsDragEnabled(true); };
+  
+  const handlePointerDown = (e) => {
+    if (backend.isDecryptionFailed) return;
+    dragStartTargetRef.current = e.target;
+    if (e.clientX <= 25) {
+      setIsDragEnabled(true);
+    } else if (e.target.closest(`.${styles.messageBubble}`)) {
+      setIsDragEnabled(false);
+    } else {
+      setIsDragEnabled(true);
+    }
+  };
 
   const messageVariants = { hidden: { opacity: 0, y: 20, scale: 0.95 }, visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.3 } }, exit: { opacity: 0, scale: 0.9, transition: { duration: 0.2 } } };
   const skeletonPattern = [false, true, true, false, true, false, false, true, false, true];
@@ -117,6 +131,7 @@ const ChatPage = ({ chatId, chatName: propChatName, avatarUrl: propAvatarUrl, de
             onLoadedData={() => backend.beginRecording()} 
             className={`${styles.fullscreenVideo} ${isVideoReady ? styles.videoReady : ''}`} 
           />
+          <canvas ref={canvasRef} style={{ display: 'none' }}></canvas>
           <div className={styles.videoControlsTop}>
             <div className={styles.recordingVideoTimer}><span className={styles.recordingDot}></span>{backend.formatRecordTime(backend.recordTime)}</div>
             {backend.hasMultipleCameras && (<button className={styles.switchCameraBtn} onClick={backend.handleSwitchCamera}>🔄</button>)}
@@ -177,7 +192,7 @@ const ChatPage = ({ chatId, chatName: propChatName, avatarUrl: propAvatarUrl, de
 
                 const profile = backend.userProfiles[msg.sender] || {};
                 nodes.push(
-                  <motion.div key={msg.id} variants={messageVariants} initial="hidden" animate="visible" exit="exit" layout>
+                  <motion.div key={msg.id} variants={messageVariants} initial="hidden" animate="visible" exit="exit">
                     <MessageItem 
                       msg={msg} userEmail={userEmail} profile={profile} userProfiles={backend.userProfiles} 
                       loadedMediaUrls={backend.loadedMediaUrls} loadingMediaIds={backend.loadingMediaIds} 
@@ -208,6 +223,14 @@ const ChatPage = ({ chatId, chatName: propChatName, avatarUrl: propAvatarUrl, de
           {backend.replyingTo && (<div className={styles.replyBar}><div className={styles.replyBarInfo}><span className={styles.replyBarName}>{t('replyingTo')} {getReplyBarDisplayName()}</span><span className={styles.replyBarText}>{getReplyPreviewContent(backend.replyingTo)}</span></div><button className={styles.replyBarClose} onClick={backend.handleCancelReply}>✕</button></div>)}
 
           <div className={styles.inputRow}>
+              {backend.recordingStatus === 'preparing' && backend.recordingMode === 'audio' && (
+                <div className={styles.inputContainer}>
+                  <div className={styles.input} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div className={`${styles.spinner} ${styles.spinnerSmall}`} style={{ borderColor: '#ccc', borderTopColor: '#888' }}></div>
+                  </div>
+                </div>
+              )}
+
               {backend.recordingStatus === 'recording' && backend.recordingMode === 'audio' && (
                 <>
                   <div className={styles.inputContainer}><div className={`${styles.input} ${styles.recordingInput}`}><span className={styles.recordingDot}></span><span className={styles.recordingTimerText}>{backend.formatRecordTime(backend.recordTime)}</span></div></div>

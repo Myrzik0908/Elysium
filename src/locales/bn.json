@@ -55,12 +55,12 @@
       "androidInst4": "সেটিংসে \"http://localhost:8000\" সেট করুন। \"Start server\" এ ক্লিক করুন।",
       "androidInst5": "ব্রাউজার খুলুন এবং ঠিকানায় যান",
       "iosTitle": "iOS",
-      "iosRec": "আমরা \"Documents by Readdle\" ব্যবহার করার পরামর্শ দিই।",
-      "iosInst1": "অ্যাপ ইনস্টল করুন।",
-      "iosInst2": "Elysium প্রকল্পের ফাইলগুলি Documents অ্যাপে কপি করুন।",
-      "iosInst3": "Documents খুলুন, সেটিংসে যান।",
-      "iosInst4": "\"Web Server\" সক্ষম করুন।",
-      "iosInst5": "অ্যাপটি একটি URL প্রদর্শন করবে। Safari খুলুন এবং সেই URL-এ নেভিগেট করুন।",
+      "iosRec": "আমরা \"a-Shell\" টার্মিনাল ব্যবহার করার পরামর্শ দিই।",
+      "iosInst1": "\"Files\" অ্যাপে, Elysium প্রজেক্ট ফোল্ডারটি a-Shell ফোল্ডারে সরান।",
+      "iosInst2": "a-Shell খুলুন এবং লিখুন: cd Documents",
+      "iosInst3": "এই কমান্ড দিয়ে সার্ভার শুরু করুন: python -m http.server 8000",
+      "iosInst4": "a-Shell ছোট করুন (ব্যাকগ্রাউন্ডে চালু রাখুন) এবং Safari খুলুন।",
+      "iosInst5": "Safari-এ লিখুন: http://127.0.0.1:8000",
       "footer": "সার্ভার শুরু করার পরে, আপনার ব্রাউজারে http://localhost:8000 খুলুন।"
     },
     "userAgreement": {

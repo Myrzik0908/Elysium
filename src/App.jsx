@@ -546,7 +546,10 @@ function AppContent() {
 }
 
 function App() {
-  if (window.location.protocol === 'file:' || window.location.protocol === 'content:') return <GettingStartedPage />;
+  const isSafeProtocol = window.location.protocol === 'http:' || window.location.protocol === 'https:';
+  
+  if (!isSafeProtocol) return <GettingStartedPage />;
+  
   return ( 
     <HashRouter>
       <Routes>
