@@ -33,7 +33,9 @@
     "unknown": "Неизвестно",
     "confirmDeleteMessage": "Удалить это сообщение?",
     "microphonePermissionDenied": "Доступ к микрофону запрещен.",
-
+    "search": "Поиск...",
+    "searchMessages": "Поиск по сообщениям",
+    "noResults": "Ничего не найдено",
     "app": {
       "resetIds": "Сбросить ID",
       "chatsTitle": "Elysium",
@@ -73,6 +75,7 @@
 
     "chatsPage": {
       "initializing": "Инициализация...",
+      "noSearchResults": "Чаты не найдены",
       "noChats": "У вас пока нет чатов.",
       "createHint": "Создайте новый чат, чтобы начать.",
       "createBtn": "+ Чат"
@@ -139,7 +142,13 @@
       "userAgreement": "Пользовательское соглашение",
       "exit": "Выйти",
       "confirmDisable": "Отключить Key Manager? Это удалит ключи для этого провайдера.",
-      "passMinLength": "Минимальная длина пароля 12 символов"
+      "passMinLength": "Минимальная длина пароля 12 символов",
+      "domainFilter": "Фильтрация доменов",
+      "blacklistMode": "Черные домены",
+      "whitelistMode": "Белые домены",
+      "whitelistHint": "Ссылки с доменами не из списка будут скрыты",
+      "blacklistHint": "Ссылки с доменами из данного списка будут скрыты",
+      "domainsPlaceholder": "Введите домены..."
     },
 
     "masterPass": {

@@ -1,9 +1,38 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useDragControls } from 'framer-motion';
 import styles from './styles/ChatPage.module.css';
 import { useChatBackend } from '../context/ChatBackend';
 import MessageItem from './MessageItem';
+
+// SVG Icon components
+const ArrowLeftIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+);
+
+const SearchIcon = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+);
+
+const DownloadIcon = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+);
+
+const MoreIcon = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+);
+
+const CloseIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+);
+
+const ArrowUpIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+);
+
+const ArrowDownIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+);
 
 const MessageSkeleton = ({ isOwn }) => {
   return (
@@ -38,11 +67,18 @@ const ChatPage = ({ chatId, chatName: propChatName, avatarUrl: propAvatarUrl, de
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
-  const [isDragEnabled, setIsDragEnabled] = useState(true);
-  const dragStartTargetRef = useRef(null); 
   const [currentUserImgError, setCurrentUserImgError] = useState(false);
   
   const [isVideoReady, setIsVideoReady] = useState(false);
+
+  // Search State
+  const [isSearchActive, setIsSearchActive] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchMatches, setSearchMatches] = useState([]);
+  const [currentMatchIndex, setCurrentMatchIndex] = useState(-1);
+
+  // Drag Controls for smooth mobile swipe
+  const dragControls = useDragControls();
 
   useEffect(() => {
     if ((backend.recordingStatus === 'preparing' || backend.recordingStatus === 'recording') && backend.recordingMode === 'video' && backend.recordStream) {
@@ -64,11 +100,45 @@ const ChatPage = ({ chatId, chatName: propChatName, avatarUrl: propAvatarUrl, de
   }, [backend.recordStream]);
 
   useEffect(() => {
-    if (!backend.isInitialLoading && !backend.isDecryptionFailed) {
+    if (!backend.isInitialLoading && !backend.isDecryptionFailed && !isSearchActive) {
       const timer = setTimeout(() => { messagesEndRef.current?.scrollIntoView({ behavior: "auto" }); }, 50);
       return () => clearTimeout(timer);
     }
-  }, [backend.messages, backend.isInitialLoading, backend.isDecryptionFailed]);
+  }, [backend.messages, backend.isInitialLoading, backend.isDecryptionFailed, isSearchActive]);
+
+  // Search logic useEffect
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchMatches([]);
+      setCurrentMatchIndex(-1);
+      return;
+    }
+    
+    const normalize = (str) => str.replace(/\s+/g, ' ').trim().toLowerCase();
+    const normalizedQuery = normalize(searchQuery);
+    
+    const matches = backend.messages
+      .filter(msg => {
+        const normalizedText = normalize(msg.text || '');
+        const normalizedFileName = normalize(msg.fileName || '');
+        return normalizedText.includes(normalizedQuery) || normalizedFileName.includes(normalizedQuery);
+      })
+      .map(msg => msg.id);
+    
+    setSearchMatches(matches);
+    if (matches.length > 0) {
+      setCurrentMatchIndex(matches.length - 1); 
+    } else {
+      setCurrentMatchIndex(-1);
+    }
+  }, [searchQuery, backend.messages]);
+
+  useEffect(() => {
+    if (currentMatchIndex >= 0 && currentMatchIndex < searchMatches.length) {
+      const targetId = searchMatches[currentMatchIndex];
+      scrollToMessage(targetId);
+    }
+  }, [currentMatchIndex, searchMatches]);
 
   const handleScroll = (e) => {
     const { scrollTop, scrollHeight, clientHeight } = e.target;
@@ -85,6 +155,17 @@ const ChatPage = ({ chatId, chatName: propChatName, avatarUrl: propAvatarUrl, de
     }
   };
 
+  const handlePrevMatch = () => {
+    if (currentMatchIndex > 0) setCurrentMatchIndex(prev => prev - 1);
+  };
+  const handleNextMatch = () => {
+    if (currentMatchIndex < searchMatches.length - 1) setCurrentMatchIndex(prev => prev + 1);
+  };
+  const handleCloseSearch = () => {
+    setIsSearchActive(false);
+    setSearchQuery('');
+  };
+
   const fallbackLetter = currentChatName ? currentChatName[0].toUpperCase() : 'U';
   const finalAvatarUrl = backend.privateAvatarUrl || propAvatarUrl;
   const showFallback = (!finalAvatarUrl || backend.imgError);
@@ -98,18 +179,34 @@ const ChatPage = ({ chatId, chatName: propChatName, avatarUrl: propAvatarUrl, de
     if (sender === userEmail) return t('yourself'); const profile = backend.userProfiles[sender]; return profile?.name || sender.split('@')[0];
   };
 
-  const handleDragEnd = (event, info) => { if (dragStartTargetRef.current && dragStartTargetRef.current.closest(`.${styles.messageBubble}`)) return; if (info.offset.x > 100 || (info.velocity.x > 300 && info.offset.x > 20)) onBack(); };
+  // Cleaned up drag end logic
+  const handleDragEnd = (event, info) => {
+    if (info.offset.x > 100 || (info.velocity.x > 300 && info.offset.x > 20)) {
+      onBack();
+    }
+  };
   
+  // Added strict blocking conditions and imperative drag start
   const handlePointerDown = (e) => {
     if (backend.isDecryptionFailed) return;
-    dragStartTargetRef.current = e.target;
-    if (e.clientX <= 25) {
-      setIsDragEnabled(true);
-    } else if (e.target.closest(`.${styles.messageBubble}`)) {
-      setIsDragEnabled(false);
-    } else {
-      setIsDragEnabled(true);
+    
+    // 1. Block swipe if uploading files or recording media
+    if (backend.isUploading || backend.recordingStatus !== 'idle') return;
+    // 2. Block swipe if search is active
+    if (isSearchActive) return;
+    
+    // 3. Prevent drag if interacting with specific elements (messages, inputs, buttons, etc.)
+    if (e.target.closest(`.${styles.messageBubble}`) || 
+        e.target.closest('button') || 
+        e.target.closest('textarea') || 
+        e.target.closest('input') || 
+        e.target.closest(`.${styles.hashtagList}`) ||
+        e.target.closest(`.${styles.searchBar}`)) {
+      return;
     }
+    
+    // 4. Smoothly start drag without re-rendering React component
+    dragControls.start(e);
   };
 
   const messageVariants = { hidden: { opacity: 0, y: 20, scale: 0.95 }, visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.3 } }, exit: { opacity: 0, scale: 0.9, transition: { duration: 0.2 } } };
@@ -117,9 +214,35 @@ const ChatPage = ({ chatId, chatName: propChatName, avatarUrl: propAvatarUrl, de
 
   const showVideoOverlay = (backend.recordingStatus === 'preparing' || backend.recordingStatus === 'recording') && backend.recordingMode === 'video';
 
+  // ADDED: Read domain filter settings from localStorage synchronously
+  const getDomainFilterSettings = () => {
+    if (!providerName || !userEmail) return { enabled: false };
+    const key = `elysium_domain_filter_${providerName}_${userEmail}`;
+    const stored = localStorage.getItem(key);
+    if (stored) {
+      try { return JSON.parse(stored); } catch (e) { return { enabled: false }; }
+    }
+    return { enabled: false };
+  };
+
+  const domainFilterSettings = getDomainFilterSettings();
+
   return (
-    <motion.div className={styles.container} drag={isDragEnabled ? "x" : false} dragConstraints={{ left: 0, right: 0 }} dragElastic={{ left: 0, right: 0.5 }} onDragEnd={handleDragEnd} style={{ touchAction: isDragEnabled ? 'pan-y' : 'auto' }} onPointerDown={handlePointerDown} onDragEnter={backend.handleDragEnter} onDragLeave={backend.handleDragLeave} onDragOver={backend.handleDragOver} onDrop={backend.handleDrop}>
-      
+    <motion.div 
+      className={styles.container} 
+      drag="x" 
+      dragControls={dragControls} 
+      dragListener={false} 
+      dragConstraints={{ left: 0, right: 0 }} 
+      dragElastic={{ left: 0, right: 0.5 }} 
+      onDragEnd={handleDragEnd} 
+      style={{ touchAction: 'pan-y' }} 
+      onPointerDown={handlePointerDown} 
+      onDragEnter={backend.handleDragEnter} 
+      onDragLeave={backend.handleDragLeave} 
+      onDragOver={backend.handleDragOver} 
+      onDrop={backend.handleDrop}
+    >
       {showVideoOverlay && (
         <div className={styles.fullscreenVideoOverlay}>
           <video 
@@ -146,7 +269,7 @@ const ChatPage = ({ chatId, chatName: propChatName, avatarUrl: propAvatarUrl, de
       <input type="file" ref={backend.fileInputRef} style={{ display: 'none' }} onChange={backend.handleFileChange} disabled={backend.isDecryptionFailed} />
 
       <header className={styles.header}>
-        <button className={styles.iconButton} onClick={onBack}>←</button>
+        <button className={styles.iconButton} onClick={onBack}><ArrowLeftIcon /></button>
         <div className={styles.chatInfo}>
           <div className={`${styles.userAvatar} ${backend.isDecryptionFailed ? styles.disabledControl : ''}`} onClick={backend.isDecryptionFailed ? undefined : (e) => { e.stopPropagation(); onOpenProfile(); }}>
             {backend.areProfilesLoading ? (<div className={styles.avatarLoading}></div>) : currentUserAvatarUrl && !currentUserImgError ? (<img src={currentUserAvatarUrl} alt="Me" className={styles.userAvatarImage} onError={() => setCurrentUserImgError(true)} />) : (<div className={styles.userAvatarFallback}>{currentUserFallback}</div>)}
@@ -159,9 +282,42 @@ const ChatPage = ({ chatId, chatName: propChatName, avatarUrl: propAvatarUrl, de
             <span className={styles.status}>{backend.isDecryptionFailed ? '❌' : (backend.chatDescription || t('loading'))}</span>
           </div>
         </div>
-        <button className={`${styles.iconButton} ${backend.isDecryptionFailed ? styles.disabledControl : ''}`} onClick={backend.isDecryptionFailed ? undefined : backend.handleExportChat} title={t('chatPage.exportChat')}>↓</button>
-        <button className={`${styles.iconButton} ${backend.isDecryptionFailed ? styles.disabledControl : ''}`} onClick={backend.isDecryptionFailed ? undefined : onOpenEditChat}>⋯</button>
+        
+        <button className={`${styles.iconButton} ${backend.isDecryptionFailed ? styles.disabledControl : ''}`} onClick={backend.isDecryptionFailed ? undefined : () => setIsSearchActive(true)} title={t('searchMessages')}>
+          <SearchIcon />
+        </button>
+        <button className={`${styles.iconButton} ${backend.isDecryptionFailed ? styles.disabledControl : ''}`} onClick={backend.isDecryptionFailed ? undefined : backend.handleExportChat} title={t('chatPage.exportChat')}>
+          <DownloadIcon />
+        </button>
+        <button className={`${styles.iconButton} ${backend.isDecryptionFailed ? styles.disabledControl : ''}`} onClick={backend.isDecryptionFailed ? undefined : onOpenEditChat}>
+          <MoreIcon />
+        </button>
       </header>
+
+      {isSearchActive && (
+        <div className={styles.searchBar}>
+          <textarea
+            className={styles.searchInput}
+            placeholder={t('searchMessages') || 'Search...'}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            autoFocus
+            rows={1}
+          />
+          <span className={styles.searchCounter}>
+            {searchMatches.length > 0 ? `${currentMatchIndex + 1}/${searchMatches.length}` : (searchQuery ? t('noResults') : '')}
+          </span>
+          <button className={styles.searchNavBtn} onClick={handlePrevMatch} disabled={currentMatchIndex <= 0}>
+            <ArrowUpIcon />
+          </button>
+          <button className={styles.searchNavBtn} onClick={handleNextMatch} disabled={currentMatchIndex >= searchMatches.length - 1}>
+            <ArrowDownIcon />
+          </button>
+          <button className={styles.searchNavBtn} onClick={handleCloseSearch}>
+            <CloseIcon />
+          </button>
+        </div>
+      )}
 
       <main className={styles.messageList} ref={messagesContainerRef} onScroll={handleScroll}>
         {backend.isDecryptionFailed ? (
@@ -194,16 +350,25 @@ const ChatPage = ({ chatId, chatName: propChatName, avatarUrl: propAvatarUrl, de
                 nodes.push(
                   <motion.div key={msg.id} variants={messageVariants} initial="hidden" animate="visible" exit="exit">
                     <MessageItem 
-                      msg={msg} userEmail={userEmail} profile={profile} userProfiles={backend.userProfiles} 
-                      loadedMediaUrls={backend.loadedMediaUrls} loadingMediaIds={backend.loadingMediaIds} 
-                      copiedMessageId={backend.copiedMessageId} onCopy={backend.handleCopyMessage} 
-                      onDelete={backend.handleDeleteMessage} onViewMedia={backend.handleViewMedia} 
-                      onDownload={backend.handleDownloadFile} onFullscreen={backend.handleOpenFullscreen} 
-                      onReply={backend.handleStartReply} onScrollToMessage={scrollToMessage} 
+                      msg={msg} 
+                      userEmail={userEmail} 
+                      profile={profile} 
+                      userProfiles={backend.userProfiles} 
+                      loadedMediaUrls={backend.loadedMediaUrls} 
+                      loadingMediaIds={backend.loadingMediaIds} 
+                      copiedMessageId={backend.copiedMessageId} 
+                      onCopy={backend.handleCopyMessage} 
+                      onDelete={backend.handleDeleteMessage} 
+                      onViewMedia={backend.handleViewMedia} 
+                      onDownload={backend.handleDownloadFile} 
+                      onFullscreen={backend.handleOpenFullscreen} 
+                      onReply={backend.handleStartReply} 
+                      onScrollToMessage={scrollToMessage} 
                       loadedFileTexts={backend.loadedFileTexts} 
                       loadingTextIds={backend.loadingTextIds} 
                       viewingTextIds={backend.viewingTextIds} 
                       onToggleTextView={backend.handleToggleTextView} 
+                      domainFilterSettings={domainFilterSettings} // ADDED: Pass domain filter settings
                     />
                   </motion.div>
                 );

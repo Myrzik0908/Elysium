@@ -19,6 +19,12 @@ const SettingsPage = ({
   const [isAwaitingActivation, setIsAwaitingActivation] = useState(false);
   const [displayKeys, setDisplayKeys] = useState([]);
 
+  // Domain Filter State
+  const [isDomainFilterEnabled, setIsDomainFilterEnabled] = useState(false);
+  const [domainFilterMode, setDomainFilterMode] = useState('blacklist');
+  const [domainsText, setDomainsText] = useState('');
+  const [originalDomainSettings, setOriginalDomainSettings] = useState({ enabled: false, mode: 'blacklist', domains: '' });
+
   useEffect(() => {
     if (isKMEnabled && kmMasterPassword) {
       setMasterPassword(kmMasterPassword);
@@ -46,6 +52,29 @@ const SettingsPage = ({
   useEffect(() => {
     if (isKMEnabled) setIsAwaitingActivation(false);
   }, [isKMEnabled]);
+
+  // Load Domain Filter Settings from LocalStorage
+  useEffect(() => {
+    if (!providerName || !userEmail) return;
+    const key = `elysium_domain_filter_${providerName}_${userEmail}`;
+    const stored = localStorage.getItem(key);
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        const settings = {
+          enabled: parsed.enabled || false,
+          mode: parsed.mode || 'blacklist',
+          domains: parsed.domains || ''
+        };
+        setIsDomainFilterEnabled(settings.enabled);
+        setDomainFilterMode(settings.mode);
+        setDomainsText(settings.domains);
+        setOriginalDomainSettings(settings);
+      } catch (e) { 
+        console.error("Failed to parse domain settings", e); 
+      }
+    }
+  }, [providerName, userEmail]);
 
   const handleToggleKeyManager = () => {
     if (isKMEnabled) {
@@ -109,6 +138,39 @@ const SettingsPage = ({
   
   const showContent = isKMEnabled || isAwaitingActivation;
   const showConfirmButton = (isAwaitingActivation && !isKMEnabled) || isDirty;
+
+  // ADDED: Toggle Domain Filter (Auto-saves if turning OFF)
+  const handleToggleDomainFilter = () => {
+    const newVal = !isDomainFilterEnabled;
+    setIsDomainFilterEnabled(newVal);
+    
+    // If turning off, instantly save without needing the Save button
+    if (!newVal && providerName && userEmail) {
+      const key = `elysium_domain_filter_${providerName}_${userEmail}`;
+      const settings = { enabled: false, mode: domainFilterMode, domains: domainsText };
+      localStorage.setItem(key, JSON.stringify(settings));
+      setOriginalDomainSettings(settings);
+    }
+  };
+
+  // Show Save button ONLY if filter is enabled AND something changed (or it was just turned ON)
+  const showSaveDomainBtn = isDomainFilterEnabled && (
+    !originalDomainSettings.enabled ||
+    domainFilterMode !== originalDomainSettings.mode ||
+    domainsText !== originalDomainSettings.domains
+  );
+
+  const handleSaveDomainFilter = () => {
+    if (!providerName || !userEmail) return;
+    const key = `elysium_domain_filter_${providerName}_${userEmail}`;
+    const settings = {
+      enabled: isDomainFilterEnabled,
+      mode: domainFilterMode,
+      domains: domainsText
+    };
+    localStorage.setItem(key, JSON.stringify(settings));
+    setOriginalDomainSettings(settings);
+  };
 
   return (
     <div className={styles.container}>
@@ -206,6 +268,64 @@ const SettingsPage = ({
             </div>
           )}
         </div>
+
+        {/* Domain Filter Section */}
+        <div className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <span className={styles.sectionTitle}>{t('settings.domainFilter')}</span>
+            <label className={styles.switch}>
+              <input 
+                type="checkbox" 
+                checked={isDomainFilterEnabled} 
+                onChange={handleToggleDomainFilter} 
+              />
+              <span className={styles.slider}></span>
+            </label>
+          </div>
+
+          {isDomainFilterEnabled && (
+            <div className={styles.keyManagerContent}>
+              <div className={styles.modeSwitcher}>
+                <button 
+                  className={`${styles.modeBtn} ${domainFilterMode === 'blacklist' ? styles.modeBtnActive : ''}`}
+                  onClick={() => setDomainFilterMode('blacklist')}
+                >
+                  {t('settings.blacklistMode')}
+                </button>
+                <button 
+                  className={`${styles.modeBtn} ${domainFilterMode === 'whitelist' ? styles.modeBtnActive : ''}`}
+                  onClick={() => setDomainFilterMode('whitelist')}
+                >
+                  {t('settings.whitelistMode')}
+                </button>
+              </div>
+
+              <p className={styles.hintText}>
+                {domainFilterMode === 'whitelist' ? t('settings.whitelistHint') : t('settings.blacklistHint')}
+              </p>
+
+              <textarea 
+                className={styles.textareaField}
+                value={domainsText}
+                onChange={(e) => setDomainsText(e.target.value)}
+                placeholder={t('settings.domainsPlaceholder') || ''}
+                rows={5}
+              />
+            </div>
+          )}
+
+          {/* Save Button appears ONLY if filter is ON and settings were changed */}
+          {showSaveDomainBtn && (
+            <button 
+              className={styles.unlockBtn}
+              style={{ marginTop: '15px' }}
+              onClick={handleSaveDomainFilter}
+            >
+              {t('save')}
+            </button>
+          )}
+        </div>
+
       </div>
 
       <div className={styles.footer}>

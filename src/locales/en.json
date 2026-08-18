@@ -33,7 +33,9 @@
     "unknown": "Unknown",
     "confirmDeleteMessage": "Delete this message?",
     "microphonePermissionDenied": "Microphone access denied.",
-
+    "search": "Search...",
+    "searchMessages": "Search messages",
+    "noResults": "No results",
     "app": {
       "resetIds": "Reset IDs",
       "chatsTitle": "Elysium",
@@ -74,6 +76,7 @@
     "chatsPage": {
       "initializing": "Initializing...",
       "noChats": "You don't have any chats.",
+      "noSearchResults": "No chats found",
       "createHint": "Create a new chat to get started.",
       "createBtn": "+ Chat"
     },
@@ -139,7 +142,13 @@
       "userAgreement": "User Agreement",
       "exit": "Exit",
       "confirmDisable": "Disable Key Manager? This will remove keys for this provider.",
-      "passMinLength": "Minimum password length 12 characters"
+      "passMinLength": "Minimum password length 12 characters",
+      "domainFilter": "Domain Filtering",
+      "blacklistMode": "Blacklist",
+      "whitelistMode": "Whitelist",
+      "whitelistHint": "Links with domains not in the list will be hidden",
+      "blacklistHint": "Links with domains from this list will be hidden",
+      "domainsPlaceholder": "Enter domains..."
     },
 
     "masterPass": {

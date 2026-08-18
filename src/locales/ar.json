@@ -15,7 +15,9 @@
     "unknown": "غير معروف",
     "confirmDeleteMessage": "حذف هذه الرسالة؟",
     "microphonePermissionDenied": "تم رفض الوصول إلى الميكروفون.",
-
+    "search": "بحث...",
+    "searchMessages": "البحث في الرسائل",
+    "noResults": "لا توجد نتائج",
     "app": { 
       "resetIds": "إعادة تعيين المعرفات", 
       "chatsTitle": "Elysium",
@@ -31,7 +33,7 @@
     "loginPage": { "title": "Elysium", "quickLogin": "تسجيل دخول سريع", "addProvider": "إضافة مزود" },
     "registerPage": { "createApp": "إنشاء تطبيق", "selectProvider": "اختر مزود الخدمة السحابي", "pasteId": "الصق معرف العميل الجديد أدناه", "enterId": "أدخل معرف العميل...", "saveAndLogin": "حفظ وتسجيل الدخول", "backToList": "العودة للقائمة", "backToWelcome": "العودة للترحيب" },
     "addProviderPage": { "title": "إضافة مزود", "subtitle": "تسجيل الدخول باستخدام معرف العميل", "selectProvider": "اختر المزود", "clientId": "معرف العميل", "pasteHere": "الصق معرف العميل هنا..." },
-    "chatsPage": { "initializing": "جار التهيئة...", "noChats": "ليس لديك أي محادثات.", "createHint": "قم بإنشاء محادثة جديدة للبدء.", "createBtn": "+ محادثة" },
+    "chatsPage": { "initializing": "جار التهيئة...", "noChats": "ليس لديك أي محادثات.", "createHint": "قم بإنشاء محادثة جديدة للبدء.", "createBtn": "+ محادثة", "noSearchResults": "لم يتم العثور على محادثات" },
     "chatPage": { 
       "messagePlaceholder": "رسالة...", 
       "uploadingFile": "جار رفع الملف...", 
@@ -49,7 +51,7 @@
     "createChat": { "title": "إنشاء محادثة", "namePlaceholder": "اسم المحادثة", "descPlaceholder": "الوصف (اختياري)", "publicAvatar": "عام", "privateAvatar": "خاص", "encKeyLabel": "مفتاح التشفير (32 حرفاً)", "quickLogin": "تسجيل دخول سريع", "participants": "المشاركون", "addUser": "+ إضافة مستخدم", "yandexHint": "بالنسبة لـ Yandex.Disk، تتم إضافة المشاركين عبر رابط دعوة عام.", "alertEncKey": "يجب أن يكون المفتاح 32 حرفاً على الأقل." },
     "editChat": { "title": "تعديل المحادثة", "inviteLink": "رابط الدعوة", "getLink": "الحصول على الرابط", "generating": "جار الإنشاء...", "yandexLinkHint": "يستخدم Yandex Disk روابط عامة.", "deleteConfirm": "حذف هذه المحادثة؟", "alertKeyNotFound": "المفتاح غير موجود.", "alertLinkFailed": "فشل الحصول على الرابط" },
     "editProfile": { "title": "تعديل الملف الشخصي", "displayName": "اسم العرض", "enterName": "أدخل اسمك", "email": "البريد الإلكتروني", "emailHint": "بريدك الإلكتروني مرتبط بهذه المحادثة", "changeAvatar": "انقر لتغيير الصورة الرمزية", "alertName": "الرجاء إدخال اسم" },
-    "settings": { "title": "Elysium", "keyManager": "مدير المفاتيح", "enterMasterPass": "أدخل كلمة المرور الرئيسية...", "setMasterPass": "تعيين كلمة المرور (12 حرفاً)", "showAllKeys": "إظهار كل المفاتيح", "noKeys": "لا توجد مفاتيح محفوظة.", "language": "اللغة", "userAgreement": "اتفاقية المستخدم", "exit": "خروج", "confirmDisable": "تعطيل مدير المفاتيح؟ سيؤدي هذا إلى إزالة المفاتيح.", "passMinLength": "الحد الأدنى 12 حرفاً" },
+    "settings": { "title": "Elysium", "keyManager": "مدير المفاتيح", "enterMasterPass": "أدخل كلمة المرور الرئيسية...", "setMasterPass": "تعيين كلمة المرور (12 حرفاً)", "showAllKeys": "إظهار كل المفاتيح", "noKeys": "لا توجد مفاتيح محفوظة.", "language": "اللغة", "userAgreement": "اتفاقية المستخدم", "exit": "خروج", "confirmDisable": "تعطيل مدير المفاتيح؟ سيؤدي هذا إلى إزالة المفاتيح.", "passMinLength": "الحد الأدنى 12 حرفاً", "domainFilter": "تصفية النطاقات", "blacklistMode": "القائمة السوداء", "whitelistMode": "القائمة البيضاء", "whitelistHint": "سيتم إخفاء الروابط التي تحتوي على نطاقات غير موجودة في القائمة", "blacklistHint": "سيتم إخفاء الروابط التي تحتوي على نطاقات من هذه القائمة", "domainsPlaceholder": "أدخل النطاقات..." },
     "masterPass": { "title": "مدير المفاتيح", "provider": "المزود:", "enterPass": "أدخل كلمة المرور الرئيسية", "unlock": "فتح القفل", "checking": "جار التحقق...", "wrongPass": "كلمة مرور خاطئة أو بيانات تالفة", "disable": "تعطيل المدير (إعادة تعيين)" },
     "gettingStarted": { 
       "title": "Elysium", 

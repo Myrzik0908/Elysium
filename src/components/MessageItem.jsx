@@ -29,7 +29,8 @@ const MessageItem = ({
   loadedFileTexts,
   loadingTextIds,
   viewingTextIds,
-  onToggleTextView
+  onToggleTextView,
+  domainFilterSettings // ADDED: Receive domain filter settings
 }) => {
   const { t } = useTranslation();
   const [isCodeCopied, setIsCodeCopied] = useState(false);
@@ -40,10 +41,47 @@ const MessageItem = ({
   const senderFallback = displayName ? displayName[0].toUpperCase() : '?';
   const areProfilesLoading = false; 
 
+  // ADDED: Function to filter URLs based on domain settings
+  const getFilteredText = (text) => {
+    if (!text) return '';
+    if (!domainFilterSettings || !domainFilterSettings.enabled) return text;
+    
+    const domainList = (domainFilterSettings.domains || '')
+      .split('\n')
+      .map(d => d.trim().toLowerCase())
+      .filter(d => d);
+
+    // Regex to find URLs starting with http:// or https://
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    
+    return text.replace(urlRegex, (url) => {
+      try {
+        // Extract hostname and remove 'www.' prefix
+        const domain = new URL(url).hostname.replace(/^www\./, '').toLowerCase();
+        // Check if domain or subdomain matches any in the list
+        const isMatch = domainList.some(d => domain === d || domain.endsWith('.' + d));
+        
+        if (domainFilterSettings.mode === 'whitelist') {
+          // Whitelist: Hide if NOT in the list
+          return isMatch ? url : '[url]';
+        } else {
+          // Blacklist: Hide if IN the list
+          return isMatch ? '[url]' : url;
+        }
+      } catch (e) {
+        return url; // Not a valid URL, leave as is
+      }
+    });
+  };
+
   const getReplyContent = (reply) => {
     if (!reply) return null;
     if (reply.fileName) return `📎 ${reply.fileName}`;
-    if (reply.text) return reply.text.length > 50 ? reply.text.substring(0, 50) + '...' : reply.text;
+    if (reply.text) {
+      // ADDED: Apply filter to reply preview text as well
+      const filteredText = getFilteredText(reply.text);
+      return filteredText.length > 50 ? filteredText.substring(0, 50) + '...' : filteredText;
+    }
     return t('message');
   };
 
@@ -65,7 +103,11 @@ const MessageItem = ({
   const isLoadingText = loadingTextIds?.has(msg.id);
   const mediaType = msg.linkFile ? getMediaType(msg.fileName) : null;
   
+  // ADDED: Check if the original text had emojis, not the filtered one
   const emojiOnly = !msg.linkFile && !msg.gifUrl && isEmojiOnly(msg.text);
+
+  // ADDED: Get filtered text for rendering
+  const displayText = getFilteredText(msg.text);
 
   return (
     <div 
@@ -190,10 +232,12 @@ const MessageItem = ({
             {msg.gifUrl ? (
               <div className={styles.gifContainer}>
                 <img src={msg.gifUrl} alt="gif" className={styles.gifImage} />
-                <span className={styles.gifLinkText}>{msg.text}</span>
+                {/* MODIFIED: Use displayText instead of msg.text */}
+                <span className={styles.gifLinkText}>{displayText}</span>
               </div>
             ) : (
-              <p className={styles.messageText}>{msg.text}</p>
+              /* MODIFIED: Use displayText instead of msg.text */
+              <p className={styles.messageText}>{displayText}</p>
             )}
           </>
         )}
@@ -214,6 +258,7 @@ const MessageItem = ({
           )}
 
           {!msg.linkFile && !emojiOnly && (
+            /* MODIFIED: Pass original msg.text to copy, so user copies unfiltered text */
             <button className={styles.copyButton} onClick={() => onCopy(msg.text, msg.id)} title={t('copy')}>
               {copiedMessageId === msg.id ? '✅' : '📋'}
             </button>

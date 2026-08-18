@@ -13,6 +13,35 @@ const formatLastMessageDate = (timestamp) => {
   return `${day}.${month}.${year} ${hours}:${minutes}`;
 };
 
+// ADDED: SVG Icon components for a consistent native look
+const SearchIcon = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="11" cy="11" r="8"></circle>
+    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+  </svg>
+);
+
+const CloseIcon = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="18" y1="6" x2="6" y2="18"></line>
+    <line x1="6" y1="6" x2="18" y2="18"></line>
+  </svg>
+);
+
+// ADDED: Larger SVG icons for empty states
+const LargeSearchIcon = () => (
+  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="11" cy="11" r="8"></circle>
+    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+  </svg>
+);
+
+const FolderIcon = () => (
+  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+  </svg>
+);
+
 const ChatsPage = ({ 
   chats, isLoading, onCreateChat, onOpenSettings, onSelectChat, 
   api, userEmail, providerName, providerDisplayName, onRefreshChats,
@@ -24,6 +53,10 @@ const ChatsPage = ({
   
   const [showUpdateBtn, setShowUpdateBtn] = useState(false);
   const [updateCounter, setUpdateCounter] = useState(0);
+
+  // Search state
+  const [isSearchActive, setIsSearchActive] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const isMountedRef = useRef(true);
   const loadingRef = useRef(new Set());
@@ -69,9 +102,13 @@ const ChatsPage = ({
   }, [userEmail, providerName]);
 
   useEffect(() => {
-    if (isLoading || !api || !chats.length) return;
+    if (!api || !chats.length) return;
     
-    const chatsToLoad = chats.filter(chat => 
+    const visibleChats = searchQuery 
+      ? chats.filter(chat => chat.name.toLowerCase().includes(searchQuery.toLowerCase()))
+      : chats;
+      
+    const chatsToLoad = visibleChats.filter(chat => 
       (cachedAvatars[chat.id] === undefined || cachedAvatars[chat.id] === 'failed') && !loadingRef.current.has(chat.id)
     );
 
@@ -97,7 +134,7 @@ const ChatsPage = ({
         } catch (err) {
           console.error(`Failed to load avatar for ${chat.name}:`, err);
           if (isMountedRef.current) {
-            onCacheAvatar(chat.id, 'failed'); // Используем 'failed' вместо null для ретрая
+            onCacheAvatar(chat.id, 'failed');
           }
         } finally {
           loadingRef.current.delete(chat.id);
@@ -114,19 +151,27 @@ const ChatsPage = ({
       await Promise.all(promises);
     };
 
-    loadAvatars();
-  }, [chats, api, isLoading, cachedAvatars, onCacheAvatar]);
+    if (!isLoading) {
+      loadAvatars();
+    }
+  }, [chats, api, isLoading, cachedAvatars, onCacheAvatar, searchQuery]);
 
   const sortedChats = useMemo(() => {
     if (!chats) return [];
-    return [...chats].sort((a, b) => {
+    
+    const lowerCaseQuery = searchQuery.toLowerCase().trim();
+    const filteredChats = lowerCaseQuery 
+      ? chats.filter(chat => chat.name.toLowerCase().includes(lowerCaseQuery))
+      : chats;
+
+    return [...filteredChats].sort((a, b) => {
       const timeA = a.lastMessageTime ? new Date(a.lastMessageTime).getTime() : 0;
       const timeB = b.lastMessageTime ? new Date(b.lastMessageTime).getTime() : 0;
       if (timeA && !timeB) return -1;
       if (!timeA && timeB) return 1;
       return timeB - timeA;
     });
-  }, [chats]);
+  }, [chats, searchQuery]);
 
   const handleChatClick = (chat) => {
     const chatWithAvatar = {
@@ -154,19 +199,53 @@ const ChatsPage = ({
     }
   };
 
+  const handleOpenSearch = () => setIsSearchActive(true);
+  const handleCloseSearch = () => {
+    setIsSearchActive(false);
+    setSearchQuery('');
+  };
+  const handleSearchChange = (e) => setSearchQuery(e.target.value);
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <button className={styles.menuButton} onClick={onOpenSettings}>☰</button>
-        <div className={styles.titleWrapper}>
-          <span className={styles.title}>Elysium</span>
-          {providerDisplayName && (
-            <span className={styles.providerBadge}>
-              {providerDisplayName}
-            </span>
-          )}
-        </div>
-        <div style={{ width: '24px' }}></div>
+        <button className={styles.menuButton} onClick={onOpenSettings}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+        
+        {isSearchActive ? (
+          <input
+            type="text"
+            className={styles.searchInput}
+            placeholder={t('search') || 'Search...'}
+            value={searchQuery}
+            onChange={handleSearchChange}
+            autoFocus
+          />
+        ) : (
+          <div className={styles.titleWrapper}>
+            <span className={styles.title}>Elysium</span>
+            {providerDisplayName && (
+              <span className={styles.providerBadge}>
+                {providerDisplayName}
+              </span>
+            )}
+          </div>
+        )}
+
+        {isSearchActive ? (
+          <button className={styles.menuButton} onClick={handleCloseSearch}>
+            <CloseIcon />
+          </button>
+        ) : (
+          <button className={styles.menuButton} onClick={handleOpenSearch}>
+            <SearchIcon />
+          </button>
+        )}
       </div>
 
       <div className={styles.chatList}>
@@ -176,11 +255,24 @@ const ChatsPage = ({
             <div className={styles.loadingText}>{t('chatsPage.initializing')}</div>
           </div>
         ) : sortedChats.length === 0 ? (
-          <div className={styles.emptyState}>
-            <div className={styles.emptyIcon}>📁</div>
-            <div className={styles.emptyMessage}>{t('chatsPage.noChats')}</div>
-            <div className={styles.emptyHint}>{t('chatsPage.createHint')}</div>
-          </div>
+          searchQuery ? (
+            <div className={styles.emptyState}>
+              {/* MODIFIED: Replaced emoji with LargeSearchIcon SVG */}
+              <div className={styles.emptyIcon}>
+                <LargeSearchIcon />
+              </div>
+              <div className={styles.emptyMessage}>{t('chatsPage.noSearchResults') || 'No chats found'}</div>
+            </div>
+          ) : (
+            <div className={styles.emptyState}>
+              {/* MODIFIED: Replaced emoji with FolderIcon SVG */}
+              <div className={styles.emptyIcon}>
+                <FolderIcon />
+              </div>
+              <div className={styles.emptyMessage}>{t('chatsPage.noChats')}</div>
+              <div className={styles.emptyHint}>{t('chatsPage.createHint')}</div>
+            </div>
+          )
         ) : (
           sortedChats.map(chat => {
             const lastMsgTime = chat.lastMessageTime ? new Date(chat.lastMessageTime).getTime() : 0;

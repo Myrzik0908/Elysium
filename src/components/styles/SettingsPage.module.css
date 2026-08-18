@@ -353,3 +353,57 @@ input:checked + .slider:before {
   background-color: #FFCDD2;
   border-color: #EF9A9A;
 }
+
+/* --- Domain Filter --- */
+.modeSwitcher {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  background: #f5f5f5;
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.modeBtn {
+  flex: 1;
+  padding: 8px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #666;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.modeBtnActive {
+  background: #fff;
+  color: #000;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.hintText {
+  font-size: 13px;
+  color: #888;
+  margin: 0 0 10px 0;
+}
+
+.textareaField {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  box-sizing: border-box;
+  resize: vertical;
+  min-height: 120px;
+  font-family: monospace;
+  margin-bottom: 5px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.textareaField:focus {
+  border-color: #FFD700;
+}
